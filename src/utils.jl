@@ -84,7 +84,7 @@ function predictions(x::Array{Float64,2}, weights::Array{Float64,2})
     @inbounds for i in 1:1:np
         preds[i,:] = g(x, weights[i,:])
     end
-    stds = std(preds,dims=1)
+    stds = std(preds, dims=1)
     return preds, stds
 end
 

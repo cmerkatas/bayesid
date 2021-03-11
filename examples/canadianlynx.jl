@@ -37,7 +37,7 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)))
     bt = 0.05 # atoms gamma hyperparameter beta
     ataus = 5ones(2,2) # Gamma hyperprior on network weights precision
     btaus = 5ones(2,2) # IG hyperprior on network weights precision
-    seed = 123
+    seed = 1234
     stepsize = 0.005
     numsteps = 20
     verb = 1000
@@ -52,16 +52,19 @@ plt = scatter(data, colour = :blue, label = "Data", ylim = (3, 11.), grid=:false
 plot!(plt, [100], seriestype =:vline, colour = :green, linestyle =:dash,label = "Training Data End")
 
 thinned = est.weights[1:10:end,:];
-fit, sts = predictions(xtrain, thinned);
+fit = predictions(xtrain, thinned);
 plot!(plt, tsteps[3:100], mean(fit,dims=1)', colour =:black, label = "fitted model")
 Flux.mse(mean(fit,dims=1), ytrain)
 
 
-for i in 1:1:size(thinned, 1)
+for i in 1:5:size(thinned, 1)
     plot!(plt, tsteps[3:100], fit[i,:], colour = :blue, lalpha = 0.04, label =:none)
 end
 
-testpred = map(mean, est.predictions)
+testpred = zeros(14)
+for t in 1:14
+    testpred[t] = mean(est.predictions[t][1:1:end])
+end
 Flux.mse(testpred, data[end-13:end])
 
 # psigmas = map(std, est.predictions)
@@ -71,7 +74,12 @@ Flux.mse(testpred, data[end-13:end])
 
 allpredictions = hcat(est.predictions...)
 thinnedpredictions = allpredictions[1:10:end,:]
-for i in 1:1:size(thinnedpredictions, 1)
+mses = zeros(35000)
+for t in 1:length(mses)
+    mses[t] = Flux.mse(allpredictions[t,:], data[end-13:end])
+end
+minmse, idx = findmin(mses)
+for i in 1:5:size(thinnedpredictions, 1)
     plot!(plt, tsteps[101:end], thinnedpredictions[i,:], colour =:purple, lalpha=0.04, label=:none)
 end
 plt
@@ -84,3 +92,16 @@ clusters_plt = plot(ergodic_cluster, ylim=(0,5), lw=1.5, grid=:false, title = "E
     seriestype =:line, color = :black, label=:none, xlabel="iterations", ylabel="clusters")
 iters=["0", "10000","20000","30000","40000"]
 plot!(clusters_plt ,xticks=(0:10000:40000,iters))
+
+# prediction plot with stds
+tsteps=1:114;
+newplt = scatter(data, colour = :blue, label = "Data", ylim = (3, 11.), grid=:false);
+plot!(newplt, [100], seriestype =:vline, colour = :green, linestyle =:dash,label = "Training Data End")
+
+thinned = est.weights[1:10:end,:];
+fit, sts = predictions(xtrain, thinned);
+plot!(newplt, tsteps[3:100], mean(fit,dims=1)', ribbon = sts, alpha=0.4, colour =:blue, label = "fitted model")
+Flux.mse(mean(fit,dims=1), ytrain)
+
+predsts = std(allpredictions, dims=1)
+plot!(newplt, tsteps[101:end], mean(thinnedpredictions, dims=1)', ribbon=predsts, colour =:purple, alpha=0.4, label="preditions")
