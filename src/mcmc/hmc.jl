@@ -26,7 +26,7 @@ end
 """
 sample! performs one HMC update
 """
-function samplestep(f::NeuralNet,s::HMCState,U::Function,∇U::Function,taus::Array{Float64,1},tau_preconditioner,y::Array{Float64,2},x::Array{Float64,2})
+function samplestep(f::NeuralNet,s::HMCState,U::Function,∇U::Function,taus::Union{Float64, Array{Float64,1}},tau_preconditioner,y::Array{Float64,2},x::Array{Float64,2})
   # hamiltonian monte carlo (radford neal's version)
   acc_flag = 0
   nparams = length(s.x)

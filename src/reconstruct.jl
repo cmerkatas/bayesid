@@ -92,7 +92,7 @@ function reconstruct(; kws...)
                 for t in 1:T
                     meanstar = g(x[:,ntemp+t], current_ws.x)[1]
                     varstar = 1.0 ./ tau[d[ntemp+t]]
-                    y[ntemp+t] = meanstar 
+                    y[ntemp+t] = meanstar
                     x[:,ntemp+t] = copy(reverse(y[ntemp+t-lags:ntemp+t-1]))
                     preds[t][its-burnin] = y[ntemp+t]
                 end
@@ -107,8 +107,8 @@ function reconstruct(; kws...)
     end
 
     if T > 0
-        return est=(weights=sampled_ws[burnin+1:end,:], noise=zp[burnin+1:end], clusters=clusters, precisions=sampled_hypertaus, predictions=preds)
+        return est=(weights=sampled_ws[burnin+1:end,:], noise=zp, clusters=clusters, precisions=sampled_hypertaus, predictions=preds)
     else
-        return est=(weights=sampled_ws[burnin+1:end,:], noise=zp[burnin+1:end], clusters=clusters, precisions=sampled_hypertaus)
+        return est=(weights=sampled_ws[burnin+1:end,:], noise=zp, clusters=clusters, precisions=sampled_hypertaus)
     end
 end

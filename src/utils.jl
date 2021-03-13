@@ -109,3 +109,13 @@ function predict(g::NeuralNet, ws::HMCState, x_::Float64, sig::Float64)
     meanstar = g([x_], ws.x)[1]
     return rand(Normal(meanstar, sig))
 end
+
+function predictions(x::Array{Float64,2}, weights::Array{Float64,2})
+    np, _ = size(weights)
+    preds = zeros(np, size(x,2))
+    @inbounds for i in 1:1:np
+        preds[i,:] = g(x, weights[i,:])
+    end
+    stds = std(preds, dims=1)
+    return preds, stds
+end

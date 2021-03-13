@@ -31,7 +31,7 @@ function U(g::NeuralNet,
            new_w,
            y::AbstractArray,
            x::AbstractArray,
-           tau::Array{Float64,1},
+           tau::Union{Float64, Array{Float64,1}},
            tau_preconditioner::Vector)
     g.ws = new_w
     u = -0.5sum((g(x, g.ws) .- y).^2 .* tau') - 0.5norm(sqrt.(tau_preconditioner) .* g.ws)^2
@@ -41,7 +41,7 @@ function ∇U(g::NeuralNet,
             new_w,
             y::AbstractArray,
             x::AbstractArray,
-            tau::Array{Float64,1},
+            tau::Union{Float64, Array{Float64,1}},
             tau_preconditioner::Vector)
    g.ws = new_w
    ps = Flux.params(g.ws)
