@@ -3,7 +3,7 @@ function bnnparametric(; kws...)
     args = PArgs(; kws...)
     args.seed > 0 && Random.seed!(args.seed)
 
-    savelocation = string(pwd(), args.filename, "/parametric$(args.seed)/samples")
+    savelocation = string(pwd(), args.filename, "/parametric$(args.seed)/samples/")
     mkpath(savelocation)
 
     g = args.net # nnet
