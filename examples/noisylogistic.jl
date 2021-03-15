@@ -97,7 +97,7 @@ Random.seed!(1);g=NeuralNet(Chain(Dense(1,10,tanh), Dense(10,1)))
     bt = 0.001 # parametric gamma hyperparameter beta
     ataus = 5ones(2,2) # Gamma hyperprior on network weights precision
     btaus = 5ones(2,2) # IG hyperprior on network weights precision
-    seed = 9
+    seed = 1
     stepsize = 0.0015
     numsteps = 3
     verb = 1000
@@ -111,3 +111,29 @@ end
 allpredictions = hcat(pest.predictions...)
 Flux.mse(mean(allpredictions,dims=1), ytest)
 Flux.mae(mean(allpredictions,dims=1), ytest)
+
+# 10 runs mse and mae
+# format is: lines=runs, cols = [npbnn, gsbr, arbnn]
+modelmse = [0.565 0.574 0.40;
+            0.561 0.453 0.381;
+            0.510 0.538 0.387;
+            0.557 0.462 0.385;
+            0.531 0.433 0.377;
+            0.579 0.451 0.389;
+            0.509 0.455 0.393;
+            0.533 0.443 0.381;
+            0.556 0.477 0.388;
+            0.535 0.408 0.379
+]
+
+modelmae = [0.611 0.626 0.544;
+            0.610 0.552 0.534;
+            0.573 0.613 0.533;
+            0.600 0.559 0.537;
+            0.584 0.544 0.536;
+            0.613 0.567 0.539;
+            0.572 0.568 0.540;
+            0.572 0.561 0.533;
+            0.604 0.559 0.535;
+            0.591 0.537 0.533
+]
