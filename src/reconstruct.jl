@@ -2,6 +2,10 @@ function reconstruct(; kws...)
     # load algorithms parameters
     args = Args(; kws...)
     args.seed > 0 && Random.seed!(args.seed)
+
+    savelocation = string(pwd(), args.filename, "/seed$(args.seed)/samples/")
+    mkpath(savelocation)
+
     g = args.net # nnet
     x, y = args.x, args.y
     ntemp = length(y)

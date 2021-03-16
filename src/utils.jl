@@ -119,3 +119,22 @@ function predictions(x::Array{Float64,2}, weights::Array{Float64,2})
     stds = std(preds, dims=1)
     return preds, stds
 end
+
+function evaluationmetrics(ŷ, y)
+    # mse
+    mse = Flux.mse(ŷ, y)
+    rmse = sqrt(mse)
+
+    # mae
+    mae = Flux.mae(ŷ, y)
+
+    # mape
+    mape = mean(abs.((ŷ .- y) ./ y)) * 100
+
+    # theil's U statistic
+    rf2 = sqrt(mean(ŷ.^2))
+    ry2 = sqrt(mean(y.^2))
+    u = rmse / (rf2 * ry2)
+
+    return metrics = (mse = mse, rmse = rmse, mae = mae, mape = mape, u = u)
+end
