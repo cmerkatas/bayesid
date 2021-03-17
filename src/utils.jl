@@ -122,7 +122,7 @@ end
 
 function evaluationmetrics(ŷ, y)
     # mse
-    mse = Flux.mse(ŷ, y)
+    mse = mean((ŷ .- y).^2)
     rmse = sqrt(mse)
 
     # mae
