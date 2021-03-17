@@ -90,17 +90,17 @@ function reconstruct(; kws...)
 
         # sample predictive
         if its > burnin
-            zp[its-burnin] = samplepredictive(w, tau, at, bt)
+            zp[its-burnin], tau_pred = samplepredictive(w, tau, at, bt)
 
-            if T > 0
-                for t in 1:T
-                    meanstar = g(x[:,ntemp+t], current_ws.x)[1]
-                    varstar = 1.0 ./ tau[d[ntemp+t]]
-                    y[ntemp+t] = meanstar#, varstar^0.5))
-                    x[:,ntemp+t] = copy(reverse(y[ntemp+t-lags:ntemp+t-1]))
-                    preds[t][its-burnin] = y[ntemp+t]
-                end
-            end
+            # if T > 0
+            #     for t in 1:T
+            #         meanstar = g(x[:,ntemp+t], current_ws.x)[1]
+            #         varstar = 1.0 ./ tau[d[ntemp+t]]
+            #         y[ntemp+t] = meanstar#, varstar^0.5))
+            #         x[:,ntemp+t] = copy(reverse(y[ntemp+t-lags:ntemp+t-1]))
+            #         preds[t][its-burnin] = y[ntemp+t]
+            #     end
+            # end
         end
 
         if mod(its, verbose_every)==0
@@ -110,7 +110,29 @@ function reconstruct(; kws...)
         end
     end
 
-    writedlm(string(savelocation, "sampled_weights.txt"), sampled_ws[burnin+1:end,:])
+    T = args.npredict
+    lags = size(x,1)
+    if T > 0
+        y = hcat(y, zeros(1,T))
+        for t in 1:T
+            x = hcat(x, reverse(y[ntemp+t-lags:ntemp+t-1]))
+        end
+    end
+    preds = fill(Float64[], T)
+    for t in 1:1:T
+      preds[t] = zeros(maxiter)
+    end
+    for j in 1:1:size(sampled_ws,1)
+        for t in 1:T
+            meanstar = g(x[:,ntemp+t], sampled_ws[j,:])[1]
+            #varstar = 1.0 ./ tau[d[ntemp+t]]
+            y[ntemp+t] = meanstar#, varstar^0.5))
+            x[:,ntemp+t] = copy(reverse(y[ntemp+t-lags:ntemp+t-1]))
+            preds[t][j] = y[ntemp+t]
+        end
+    end
+
+    writedlm(string(savelocation, "sampled_weights.txt"), sampled_ws)
     writedlm(string(savelocation, "sampled_noise.txt"), zp)
     writedlm(string(savelocation, "sampled_clusters.txt"), clusters)
 
@@ -118,8 +140,8 @@ function reconstruct(; kws...)
         for t in 1:T
             writedlm(string(savelocation, "sampled_pred$t.txt"), preds[t])
         end
-        return est=(weights=sampled_ws[burnin+1:end,:], noise=zp, clusters=clusters, precisions=sampled_hypertaus, predictions=preds)
+        return est=(weights=sampled_ws, noise=zp, clusters=clusters, precisions=sampled_hypertaus, predictions=preds)
     else
-        return est=(weights=sampled_ws[burnin+1:end,:], noise=zp, clusters=clusters, precisions=sampled_hypertaus)
+        return est=(weights=sampled_ws, noise=zp, clusters=clusters, precisions=sampled_hypertaus)
     end
 end
