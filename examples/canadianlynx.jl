@@ -19,35 +19,39 @@ D = embed(ytemp, 3)
 ytrain = convert(Array{Float64, 2}, hcat(D[:, 1]...))
 xtrain = convert(Array{Float64, 2}, D[:, 2:end]')
 ytest = data[101:end]
-# initialize neural net
-Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)))
-# arguments for the main sampler
-@with_kw mutable struct Args
-    net = g
-    maxiter = 40000 # maximum number of iterations
-    burnin = 5000 # burnin iterations
-    x = xtrain # lagged data
-    y = ytrain
-    geop = 0.5
-    hyper_taus = [1. 1. ;1. 1.]
-    ap = 1. # beta hyperparameter alpha for the geometric probability
-    bp = 1. # beta hyperparameter beta for the geometric probability
-    at = 0.05 # atoms  gamma hyperparameter alpha
-    bt = 0.05 # atoms gamma hyperparameter beta
-    ataus = 5ones(2,2) # Gamma hyperprior on network weights precision
-    btaus = 5ones(2,2) # IG hyperprior on network weights precision
-    seed = 123
-    stepsize = 0.005
-    numsteps = 20
-    verb = 1000
-    npredict = 14
-    filename = "/sims/lynx/npbnn/lag$(size(xtrain,1))/"
-end
-@time est = reconstruct();
 
-ŷ =  mean(hcat(est.predictions...)[1:10:end, :], dims=1)
-ŷstd = std(hcat(est.predictions...)[1:10:end, :], dims=1)
-metrics = evaluationmetrics(ŷ , ytest)
+for sd in 1:20
+    # initialize neural net
+    Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)))
+    # arguments for the main sampler
+    @with_kw mutable struct Args
+        net = g
+        maxiter = 500 # maximum number of iterations
+        burnin = 100 # burnin iterations
+        x = xtrain # lagged data
+        y = ytrain
+        geop = 0.5
+        hyper_taus = [1. 1. ;1. 1.]
+        ap = 1. # beta hyperparameter alpha for the geometric probability
+        bp = 1. # beta hyperparameter beta for the geometric probability
+        at = 0.05 # atoms  gamma hyperparameter alpha
+        bt = 0.05 # atoms gamma hyperparameter beta
+        ataus = 10ones(2,2) # Gamma hyperprior on network weights precision
+        btaus = 10ones(2,2) # IG hyperprior on network weights precision
+        seed = 1
+        stepsize = 0.005
+        numsteps = 20
+        verb = 1000
+        npredict = 14
+        filename = "/sims/lynx/npbnn/lag$(size(xtrain,1))/"
+    end
+    @time est = reconstruct();
+
+    ŷ =  mean(hcat(est.predictions...)[1:10:end, :], dims=1)
+    ŷstd = std(hcat(est.predictions...)[1:10:end, :], dims=1)
+    metrics = evaluationmetrics(ŷ , ytest)
+    println(metrics)
+end
 
 # clusters
 clusters = est.clusters

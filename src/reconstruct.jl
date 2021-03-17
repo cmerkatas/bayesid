@@ -110,13 +110,13 @@ function reconstruct(; kws...)
         end
     end
 
-    writedlm(string(savelocation, "sampled_weights.txt"), est.weights)
-    writedlm(string(savelocation, "sampled_noise.txt"), est.noise)
-    writedlm(string(savelocation, "sampled_clusters.txt"), est.clusters)
+    writedlm(string(savelocation, "sampled_weights.txt"), sampled_ws[burnin+1:end,:])
+    writedlm(string(savelocation, "sampled_noise.txt"), zp)
+    writedlm(string(savelocation, "sampled_clusters.txt"), clusters)
 
     if T > 0
         for t in 1:T
-            writedlm(string(savelocation, "sampled_pred$t.txt"), est.predictions[t])
+            writedlm(string(savelocation, "sampled_pred$t.txt"), preds[t])
         end
         return est=(weights=sampled_ws[burnin+1:end,:], noise=zp, clusters=clusters, precisions=sampled_hypertaus, predictions=preds)
     else
