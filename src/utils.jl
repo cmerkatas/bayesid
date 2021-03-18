@@ -70,10 +70,11 @@ function samplepredictive(w::Array{Float64,1}, atoms::Array{Float64,1}, a::Float
     rd = rand()
     if rd .> W[end]
         tau_star = rand(Gamma(a, 1.0/b))
-        return rand(Normal(0.0, 1.0/tau_star^0.5))
+        return rand(Normal(0.0, 1.0/tau_star^0.5)), tau_star
     else
         cmpnent = StatsBase.sample(Weights(w))
-        return rand(Normal(0.0, 1/atoms[cmpnent]^0.5))
+        tau_star = atoms[cmpnent]
+        return rand(Normal(0.0, 1/atoms[cmpnent]^0.5)), tau_star
     end
 end
 
