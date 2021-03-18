@@ -4,6 +4,8 @@ function bnnparametric(; kws...)
     args.seed > 0 && Random.seed!(args.seed)
 
     savelocation = string(pwd(), args.filename, "/seed$(args.seed)/samples/")
+    figlocation =  string(pwd(), args.filename, "/seed$(args.seed)/figures/")
+    mkpath(figlocation)
     mkpath(savelocation)
 
     g = args.net # nnet

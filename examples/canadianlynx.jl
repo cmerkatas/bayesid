@@ -53,11 +53,12 @@ end
 acf = autocor(est.weights[2001:50:end,1], 1:20)  # autocorrelation for lags 1:20
 plot(acf, title = "Autocorrelation", legend = false, line=:stem)
 
-ŷ = median(hcat(est.predictions...)[2001:50:end, :], dims=1)
+ŷ = mean(hcat(est.predictions...)[2001:50:end, :], dims=1)
 ŷstd = std(hcat(est.predictions...)[2001:50:end, :], dims=1)
 metrics = evaluationmetrics(ŷ , ytest);
 println(metrics)
 # writedlm("sims/lynx/npbnn/seed123/metrics.txt", hcat(metrics...))
+# writedlm("sims/lynx/npbnn/seed123/ypred.txt", vcat(ŷ,ŷstd)')
 
 # prediction plot with stds
 tsteps=1:114;
@@ -111,11 +112,12 @@ end
 acf = autocor(pest.weights[1:50:end,1], 1:20)  # autocorrelation for lags 1:20
 plot(acf, title = "Autocorrelation", legend = false, line=:stem)
 
-ŷ = median(hcat(pest.predictions...)[2001:50:end, :], dims=1)
+ŷ = mean(hcat(pest.predictions...)[2001:50:end, :], dims=1)
 ŷstd = std(hcat(pest.predictions...)[2001:50:end, :], dims=1)
 metrics = evaluationmetrics(ŷ , ytest);
 println(metrics)
 # writedlm("sims/lynx/bnnparametric/seed1/metrics.txt", hcat(metrics...))
+# writedlm("sims/lynx/bnnparametric/seed1/ypred.txt", vcat(ŷ,ŷstd)')
 
 # prediction plot with stds
 tsteps=1:114;

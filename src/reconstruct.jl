@@ -4,25 +4,15 @@ function reconstruct(; kws...)
     args.seed > 0 && Random.seed!(args.seed)
 
     savelocation = string(pwd(), args.filename, "/seed$(args.seed)/samples/")
+    figlocation = string(pwd(), args.filename, "/seed$(args.seed)/figures/")
     mkpath(savelocation)
+    mkpath(figlocation)
 
     g = args.net # nnet
     x, y = args.x, args.y
     ntemp = length(y)
     maxiter, burnin = args.maxiter, args.burnin
     verbose_every = args.verb
-    # T = args.npredict
-    # lags = size(x,1)
-    # if T > 0
-    #     y = hcat(y, zeros(1,T))
-    #     for t in 1:T
-    #         x = hcat(x, reverse(y[ntemp+t-lags:ntemp+t-1]))
-    #     end
-    # end
-    # preds = fill(Float64[], T)
-    # for t in 1:1:T
-    #   preds[t] = zeros(maxiter-burnin)
-    # end
 
     @assert size(x,2)==length(y)
     n = length(y)
