@@ -11,18 +11,18 @@ function reconstruct(; kws...)
     ntemp = length(y)
     maxiter, burnin = args.maxiter, args.burnin
     verbose_every = args.verb
-    T = args.npredict
-    lags = size(x,1)
-    if T > 0
-        y = hcat(y, zeros(1,T))
-        for t in 1:T
-            x = hcat(x, reverse(y[ntemp+t-lags:ntemp+t-1]))
-        end
-    end
-    preds = fill(Float64[], T)
-    for t in 1:1:T
-      preds[t] = zeros(maxiter-burnin)
-    end
+    # T = args.npredict
+    # lags = size(x,1)
+    # if T > 0
+    #     y = hcat(y, zeros(1,T))
+    #     for t in 1:T
+    #         x = hcat(x, reverse(y[ntemp+t-lags:ntemp+t-1]))
+    #     end
+    # end
+    # preds = fill(Float64[], T)
+    # for t in 1:1:T
+    #   preds[t] = zeros(maxiter-burnin)
+    # end
 
     @assert size(x,2)==length(y)
     n = length(y)
@@ -90,7 +90,7 @@ function reconstruct(; kws...)
 
         # sample predictive
         if its > burnin
-            zp[its-burnin], tau_pred = samplepredictive(w, tau, at, bt)
+            zp[its-burnin]= samplepredictive(w, tau, at, bt)
 
             # if T > 0
             #     for t in 1:T
