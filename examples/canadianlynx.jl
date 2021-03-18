@@ -24,7 +24,7 @@ ytest = data[101:end]
 
 # for sd in 1:20
 # initialize neural net
-Random.seed!(2);g=NeuralNet(Chain(Dense(2,5,tanh), Dense(5,1)))
+Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)))
 # arguments for the main sampler
 @with_kw mutable struct Args
     net = g
@@ -42,50 +42,50 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(2,5,tanh), Dense(5,1)))
     btaus = 5ones(2,2) # IG hyperprior on network weights precision
     seed = 123
     stepsize = 0.005
-    numsteps = 10
+    numsteps = 20
     verb = 1000
     npredict = 14
-    filename = "/sims/lynx/npbnn/lag$(size(xtrain,1))/"
+    filename = "/sims/lynx/npbnn/"
 end
 @time est = reconstruct();
 
 # check for thinning
-acf = autocor(est.weights[1:50:end,1], 1:20)  # autocorrelation for lags 1:20
+acf = autocor(est.weights[2001:50:end,1], 1:20)  # autocorrelation for lags 1:20
 plot(acf, title = "Autocorrelation", legend = false, line=:stem)
-
-
 
 ŷ = median(hcat(est.predictions...)[2001:50:end, :], dims=1)
 ŷstd = std(hcat(est.predictions...)[2001:50:end, :], dims=1)
 metrics = evaluationmetrics(ŷ , ytest);
 println(metrics)
-
+# writedlm("sims/lynx/npbnn/seed123/metrics.txt", hcat(metrics...))
 
 # prediction plot with stds
 tsteps=1:114;
 newplt = scatter(data, colour = :blue, label = "Data", ylim = (1, 5.), grid=:false);
-plot!(newplt, [100], seriestype =:vline, colour = :green, linestyle =:dash, label = "Training Data End");
+plot!(newplt, [100], seriestype =:vline, colour = :green, linestyle =:dash, label = "training data end");
 
-thinned = est.weights[2001:10:end,:];
+thinned = est.weights[2001:50:end,:];
 fit, sts = predictions(xtrain, thinned);
 plot!(newplt, tsteps[size(xtrain,1)+1:100], mean(fit,dims=1)', colour=:black, label=nothing);
 plot!(newplt, tsteps[size(xtrain,1)+1:100], mean(fit,dims=1)', ribbon=sts, alpha=0.4, colour =:blue, label="fitted model");
 plot!(newplt, tsteps[length(ytemp)+1:end], ŷ', ribbon=ŷstd, colour =:purple, alpha=0.4, label="preditions")
+display(newplt)
+# savefig(newplt, "sims/lynx/npbnn/seed123/figures/fit-pred-std.pdf")
 
 # clusters
 clusters = est.clusters;
 ergodic_cluster = cumsum(clusters)./collect(1:length(clusters));
-clusters_plt = plot(ergodic_cluster, ylim=(0,5), lw=1.5, grid=:false, title = "Ergodic means for #clusters",
+clustersplt = plot(ergodic_cluster, ylim=(0,5), lw=1.5, grid=:false, title = "Ergodic means for #clusters",
     seriestype =:line, color = :black, label=:none, xlabel="iterations", ylabel="clusters");
 iters=["0", "10000","20000","30000","40000"];
-plot!(clusters_plt ,xticks=(0:10000:40000,iters))
+plot!(clustersplt ,xticks=(0:10000:40000,iters))
+savefig(clustersplt, "sims/lynx/npbnn/seed123/figures/clusters.pdf")
 
-metrics
-#
-# """
-# Parametric
-# """
-Random.seed!(2);g=NeuralNet(Chain(Dense(2,5,tanh), Dense(5,1)))
+
+"""
+Parametric
+"""
+Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)))
 @with_kw mutable struct PArgs
     net = g
     maxiter = 40000 # maximum number of iterations
@@ -99,64 +99,33 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(2,5,tanh), Dense(5,1)))
     btaus = 5ones(2,2) # IG hyperprior on network weights precision
     seed = 1
     stepsize = 0.005
-    numsteps = 5
+    numsteps = 20
     verb = 1000
     npredict = 14
-    filename = "/sims/lynx"
+    filename = "/sims/lynx/bnnparametric"
 end
 
-
 @time pest = bnnparametric()
-#
-# allpredictions = hcat(pest.predictions...)
-# Flux.mse(mean(allpredictions,dims=1), ytest)
-# Flux.mae(mean(allpredictions,dims=1), ytest)
-#
-# # prediction plot with stds
-# tsteps=1:114;
-# newplt = scatter(data, colour = :blue, label = "Data", ylim = (3, 11.), grid=:false);
-# plot!(newplt, [100], seriestype =:vline, colour = :green, linestyle =:dash,label = "Training Data End")
-#
-# thinned = pest.weights[1:10:end,:];
-# fit, sts = predictions(xtrain, thinned);
-# plot!(newplt, tsteps[3:100], mean(fit,dims=1)', colour =:black, label =nothing)
-# plot!(newplt, tsteps[3:100], mean(fit,dims=1)', ribbon = sts, alpha=0.4, colour =:blue, label = "fitted model")
-# Flux.mse(mean(fit, dims=1), ytrain)
-# Flux.mae(mean(fit, dims=1), ytrain)
-#
-# allpredictions = hcat(pest.predictions...)
-# thinnedpredictions = allpredictions[1:10:end,:]
-# predsts = std(allpredictions, dims=1)
-# plot!(newplt, tsteps[101:end], mean(thinnedpredictions, dims=1)', ribbon=predsts, colour =:purple, alpha=0.4, label="preditions")
-
 
 # check for thinning
 acf = autocor(pest.weights[1:50:end,1], 1:20)  # autocorrelation for lags 1:20
 plot(acf, title = "Autocorrelation", legend = false, line=:stem)
 
-
-
 ŷ = median(hcat(pest.predictions...)[2001:50:end, :], dims=1)
 ŷstd = std(hcat(pest.predictions...)[2001:50:end, :], dims=1)
 metrics = evaluationmetrics(ŷ , ytest);
 println(metrics)
-
+# writedlm("sims/lynx/bnnparametric/seed1/metrics.txt", hcat(metrics...))
 
 # prediction plot with stds
 tsteps=1:114;
 newplt = scatter(data, colour = :blue, label = "Data", ylim = (1, 5.), grid=:false);
-plot!(newplt, [100], seriestype =:vline, colour = :green, linestyle =:dash, label = "Training Data End");
+plot!(newplt, [100], seriestype =:vline, colour = :green, linestyle =:dash, label = "training data end");
 
 thinned = pest.weights[2001:50:end,:];
 fit, sts = predictions(xtrain, thinned);
 plot!(newplt, tsteps[size(xtrain,1)+1:100], mean(fit,dims=1)', colour=:black, label=nothing);
 plot!(newplt, tsteps[size(xtrain,1)+1:100], mean(fit,dims=1)', ribbon=sts, alpha=0.4, colour =:blue, label="fitted model");
 plot!(newplt, tsteps[length(ytemp)+1:end], ŷ', ribbon=ŷstd, colour =:purple, alpha=0.4, label="preditions")
-
-# clusters
-clusters = est.clusters;
-ergodic_cluster = cumsum(clusters)./collect(1:length(clusters));
-clusters_plt = plot(ergodic_cluster, ylim=(0,5), lw=1.5, grid=:false, title = "Ergodic means for #clusters",
-    seriestype =:line, color = :black, label=:none, xlabel="iterations", ylabel="clusters");
-iters=["0", "10000","20000","30000","40000"];
-plot!(clusters_plt ,xticks=(0:10000:40000,iters))
+display(newplt)
+savefig(newplt, "sims/lynx/bnnparametric/seed1/figures/bnnparametricfit-pred-std.pdf")

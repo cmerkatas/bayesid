@@ -14,7 +14,7 @@ savefig(clusters_plt, "sims/lynx/seed1234_40k/figures/clusters.pdf")
 
 savefig(zoomplt, "sims/lynx/seed1234_40k/figures/zoompred.pdf")
 
-savefig(newplt, "sims/lynx/seed1234_40k/figures/seed1234_40k-est-pred-std.pdf")
+savefig(newplt, "sims/lynx/npbnn/seed123/figures/fit-pred-std.pdf")
 
 savefig(bestplt, "sims/newlog/figures/bestlog-zoom-pred.pdf")
 
