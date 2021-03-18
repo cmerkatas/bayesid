@@ -44,6 +44,7 @@ Random.seed!(1);g=NeuralNet(Chain(Dense(1,10,tanh), Dense(10,1)))
     numsteps = 3
     verb = 1000
     npredict = 10
+    filename = "/sims/logistic/npbnn/lag$(size(xtrain,1))/"
 end
 
 @time est = reconstruct();
@@ -68,6 +69,7 @@ for t in 1:length(mses)
 end
 minmse, idx = findmin(mses)
 
+tsteps = 1:210
 bestplt = scatter(tsteps[ntrain+1:end], ytest, colour = :blue, label = "Data", ylim=(-1.5, 2), grid=:false)
 plot!(bestplt, tsteps[ntrain+1:end], mean(thinnedpredictions, dims=1)', color=:purple, ribbon=std(thinnedpredictions, dims=1)', alpha=0.4,label="prediction")
 

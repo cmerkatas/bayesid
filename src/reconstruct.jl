@@ -90,7 +90,7 @@ function reconstruct(; kws...)
 
         # sample predictive
         if its > burnin
-            zp[its-burnin]= samplepredictive(w, tau, at, bt)
+            zp[its-burnin] = samplepredictive(w, tau, at, bt)
 
             # if T > 0
             #     for t in 1:T
@@ -124,10 +124,10 @@ function reconstruct(; kws...)
     end
     for j in 1:1:size(sampled_ws,1)
         for t in 1:T
+            x[:,ntemp+t] = copy(reverse(y[ntemp+t-lags:ntemp+t-1]))
             meanstar = g(x[:,ntemp+t], sampled_ws[j,:])[1]
             #varstar = 1.0 ./ tau[d[ntemp+t]]
             y[ntemp+t] = meanstar#, varstar^0.5))
-            x[:,ntemp+t] = copy(reverse(y[ntemp+t-lags:ntemp+t-1]))
             preds[t][j] = y[ntemp+t]
         end
     end

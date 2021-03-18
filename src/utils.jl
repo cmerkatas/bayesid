@@ -123,19 +123,22 @@ end
 
 function evaluationmetrics(ŷ, y)
     # mse
-    mse = mean((ŷ .- y).^2)
+    ŷ = vcat(ŷ...)
+    y = vcat(y...)
+    mse = mean((ŷ - y).^2)
     rmse = sqrt(mse)
 
     # mae
     mae = Flux.mae(ŷ, y)
 
     # mape
-    mape = mean(abs.((ŷ .- y) ./ y)) * 100
+    mape = mean(abs.((ŷ - y) ./ y)) * 100
 
     # theil's U statistic
+    u1 = sqrt(sum((ŷ - y).^2)) / sqrt(sum(y.^2))
     rf2 = sqrt(mean(ŷ.^2))
     ry2 = sqrt(mean(y.^2))
-    u = rmse / (rf2 * ry2)
+    u2 = rmse / (rf2 + ry2)
 
-    return metrics = (mse = mse, rmse = rmse, mae = mae, mape = mape, u = u)
+    return metrics = (mse = mse, rmse = rmse, mae = mae, mape = mape, u1 = u1, u2 = u2)
 end

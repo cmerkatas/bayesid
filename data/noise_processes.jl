@@ -1,7 +1,7 @@
 # noise processes definition
 sigma = 0.001
-σ = 200*sigma
-noisemix1 = MixtureModel([Normal(0, 0.001), Normal(0, σ)], [0.9, 0.1])
+σi = 200*sigma
+noisemix1 = MixtureModel([Normal(0, 0.001), Normal(0, σi)], [0.9, 0.1])
 noisemixdensity1(x) = pdf.(noisemix1, x)
 
 sigma_param = sqrt(0.002)
