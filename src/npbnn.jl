@@ -91,6 +91,7 @@ function npbnn(; kws...)
         end
     end
 
+    # predict
     T = args.npredict
     lags = size(x,1)
     if T > 0

@@ -4,11 +4,10 @@ Tools for Bayesian system identification.
 bayesid delivers methods for System Identification using Bayesian neural networks with nonparametric noise processes [1]. Additionally, a autoregressive Bayesian neural network similar to [2] is implemented.
 
 # Dependencies
-It is assumed that the user has or is able to install ```julia```.
+It is assumed that the user has or is able to install ```julia```. This project has been developed in ```julia v1.5.3```.
 
 # Code structure
-The core files regarding the methods illustrated in [1] are located in ```src``` folder. Subfolders ```mcmc``` and ```models``` contain code for the Hamiltonian Monte Carlo sampler [*] and ```structs``` to implement neural networks using ```Flux``` and similar to neural networks implemented at ```Pkg DiffEqFlux.jl```.
-for sampling from the necessary full conditionals are located in ```src``` folder.
+The core files regarding the methods illustrated in [1] are located in ```src``` folder. Subfolders ```mcmc``` and ```models``` contain code for the Hamiltonian Monte Carlo sampler [*] and ```structs``` to implement neural networks using ```Flux```, similar to neural networks implemented at ```Pkg DiffEqFlux.jl```.
 
 Scripts for simulating the logistic data as well as the real data used in the paper are located in ```data``` folder.
 
@@ -22,11 +21,10 @@ In order to install all dependencies in the current state, start ```julia``` fro
 The project folder contains ```Manifest.toml``` and ```Project.toml``` files so you can type in the ```REPL```.
 
 ```julia
-julia> ] # this will show environment v1.6 in the prompt
-(v1.6) pkg> activate .
-(nbin) pkg> instantiate
+julia> Pkg.activate(".")
+julia> Pkg.instantiate()
 ```
-This will make julia install all the necessary packages and dependencies for the project.
+This will make ```julia``` install all the necessary packages and dependencies for the project.
 
 # A simulated data example
 Having complete the installation process we can run an example by first loading necessary packages and files

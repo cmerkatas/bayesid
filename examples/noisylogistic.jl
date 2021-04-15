@@ -13,7 +13,7 @@ nf = 210
 ntrain = 200
 θ = [1.,0.,-1.71]
 x₀ = .5
-data = noisypolynomial(x₀, θ, noisemix2; n=nf, seed=11) 
+data = noisypolynomial(x₀, θ, noisemix2; n=nf, seed=11)
 plot(data)
 
 # assume that data are coming from order 1 markovian process then y = F(lagged_x)
@@ -55,7 +55,7 @@ zp = est.noise;
 zp = zp[zp.>zpl];
 zp = zp[zp.<zpr];
 
-noiseplot = plot(kde(zp), color=:red, lw=1.5, label=L"\mathrm{est }\hat{f}(z)", grid=:false) #histogram(zp, bins=200, normalize=:pdf, color=:lavender, label="predictive");
+noiseplot = plot(kde(zp), color=:red, lw=1.5, label=L"\mathrm{est }\hat{f}(z)", grid=:false);
 x_range = range(zpl, stop=zpr, length=120);
 ddnoise = noisemixdensity2.(x_range);
 plot!(noiseplot, x_range, ddnoise, color=:black, lw=1.5, label=L"\mathrm{true } f(z)", ylim=(0,25), ylabel="pdf")
@@ -80,7 +80,7 @@ thinned = est.weights[2001:50:end,:];
 fit, sts = predictions(xtrain, thinned);
 plot!(newplt, tsteps[size(xtrain,1)+1:200], mean(fit,dims=1)', colour=:black, label=nothing);
 plot!(newplt, tsteps[size(xtrain,1)+1:200], mean(fit,dims=1)', ribbon=sts, alpha=0.4, colour =:blue, label="np-bnn fitted model");
-plot!(newplt, tsteps[length(ytemp)+1:end], ŷ', ribbon=ŷstd, colour =:purple, alpha=0.4, label="np-bnn preditions")
+plot!(newplt, tsteps[length(ytemp)+1:end], ŷ', ribbon=ŷstd', colour =:purple, alpha=0.4, label="np-bnn preditions")
 display(newplt)
 # savefig(newplt, "sims/logistic/npbnn/seed1/figures/logisticfit-pred-std.pdf")
 
@@ -118,20 +118,20 @@ Random.seed!(1);g=NeuralNet(Chain(Dense(1,10,tanh), Dense(10,1)))
     numsteps = 20
     verb = 1000
     npredict = 10
-    filename = "/sims/logistic/bnnparametric"
+    filename = "/sims/logistic/arbnn"
 end
 
 
 @time pest = arbnn()
 xrange=range(-0.5, stop=0.5, length=100)
 varhat = 1/sqrt(mean(pest.taus[2001:10:end]))
-noiseplot = plot(xrange, pdf.(Normal(0,varhat^0.5), xrange), color=:red, lw=1.5, label=L"\mathrm{est }\hat{f}(z)", grid=:false) #histogram(zp, bins=200, normalize=:pdf, color=:lavender, label="predictive");
+noiseplot = plot(xrange, pdf.(Normal(0,varhat), xrange), color=:red, lw=1.5, label=L"\mathrm{est }\hat{f}(z)", grid=:false) #histogram(zp, bins=200, normalize=:pdf, color=:lavender, label="predictive");
 x_range = range(zpl, stop=zpr, length=120);
 ddnoise = noisemixdensity2.(x_range);
 plot!(noiseplot, x_range, ddnoise, color=:black, lw=1.5, label=L"\mathrm{true } f(z)", ylim=(0,25), ylabel="pdf")
 
 # check for thinning
-acf = autocor(pest.weights[2001:10:end,1], 1:20)  # autocorrelation for lags 1:20
+acf = autocor(pest.weights[2001:50:end,1], 1:20)  # autocorrelation for lags 1:20
 plot(acf, title = "Autocorrelation", legend = false, line=:stem)
 
 ŷ = mean(hcat(pest.predictions...)[2001:50:end, :], dims=1)

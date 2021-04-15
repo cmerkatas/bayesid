@@ -1,4 +1,4 @@
-function bnnparametric(; kws...)
+function arbnn(; kws...)
     # load algorithms parameters
     args = PArgs(; kws...)
     args.seed > 0 && Random.seed!(args.seed)
@@ -13,18 +13,6 @@ function bnnparametric(; kws...)
     ntemp = length(y)
     maxiter, burnin = args.maxiter, args.burnin
     verbose_every = args.verb
-    # T = args.npredict
-    # lags = size(x,1)
-    # if T > 0
-    #     y = hcat(y, zeros(1,T))
-    #     for t in 1:T
-    #         x = hcat(x, reverse(y[ntemp+t-lags:ntemp+t-1]))
-    #     end
-    # end
-    # preds = fill(Float64[], T)
-    # for t in 1:1:T
-    #   preds[t] = zeros(maxiter-burnin)
-    # end
 
     @assert size(x,2)==length(y)
     n = length(y)
@@ -75,20 +63,6 @@ function bnnparametric(; kws...)
 
         sampledtau[its] = tau
 
-        # sample predictive
-        # if its > burnin
-        #     sampledtau[its-burnin] = tau
-        #
-        #     # if T > 0
-        #     #     for t in 1:T
-        #     #         meanstar = g(x[:,ntemp+t], current_ws.x)[1]
-        #     #         varstar = 1.0 ./ tau
-        #     #         y[ntemp+t] = rand(Normal(meanstar, sqrt(varstar)))
-        #     #         x[:,ntemp+t] = copy(reverse(y[ntemp+t-lags:ntemp+t-1]))
-        #     #         preds[t][its-burnin] = y[ntemp+t]
-        #     #     end
-        #     # end
-        # end
 
         if mod(its, verbose_every)==0
             println("MCMC iterations: $its out of $maxiter")
@@ -96,6 +70,7 @@ function bnnparametric(; kws...)
         end
     end
 
+    # predict
     T = args.npredict
     lags = size(x,1)
     if T > 0
