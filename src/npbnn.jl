@@ -1,4 +1,4 @@
-function reconstruct(; kws...)
+function npbnn(; kws...)
     # load algorithms parameters
     args = Args(; kws...)
     args.seed > 0 && Random.seed!(args.seed)

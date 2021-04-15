@@ -4,8 +4,8 @@ using Parameters: @with_kw
 include("../src/models/bnn.jl")
 include("../src/mcmc/hmc.jl")
 include("../src/utils.jl")
-include("../src/reconstruct.jl")
-include("../src/bnnparametric.jl")
+include("../src/npbnn.jl")
+include("../src/arbnn.jl")
 
 # load the data and log10 transform
 data = log.(10, readdlm("./data/lynx.txt"))
@@ -45,9 +45,9 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)))
     numsteps = 20
     verb = 1000
     npredict = 14
-    filename = "/sims/lynx/npbnn/"
+    filename = "/sims/lynx/npbnnrename/"
 end
-@time est = reconstruct();
+@time est = npbnn();
 
 # check for thinning
 acf = autocor(est.weights[2001:50:end,1], 1:20)  # autocorrelation for lags 1:20
@@ -106,7 +106,7 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)))
     filename = "/sims/lynx/bnnparametric"
 end
 
-@time pest = bnnparametric()
+@time pest = arbnn()
 
 # check for thinning
 acf = autocor(pest.weights[1:50:end,1], 1:20)  # autocorrelation for lags 1:20

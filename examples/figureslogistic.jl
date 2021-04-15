@@ -4,7 +4,7 @@ include("../data/datasets.jl")
 include("../src/models/bnn.jl")
 include("../src/mcmc/hmc.jl")
 include("../src/utils.jl")
-include("../src/reconstruct.jl")
+include("../src/npbnn.jl")
 include("/Users/cmerkatas/github/GSBR/src/ToolBox.jl")
 
 gr() #backend

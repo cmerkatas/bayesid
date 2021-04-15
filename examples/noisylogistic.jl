@@ -5,15 +5,15 @@ include("../data/datasets.jl")
 include("../src/models/bnn.jl")
 include("../src/mcmc/hmc.jl")
 include("../src/utils.jl")
-include("../src/reconstruct.jl")
-include("../src/bnnparametric.jl")
+include("../src/npbnn.jl")
+include("../src/arbnn.jl")
 
 # generate some data from logistic map
 nf = 210
 ntrain = 200
 θ = [1.,0.,-1.71]
 x₀ = .5
-data = noisypolynomial(x₀, θ, noisemix2; n=nf, seed=11) # already "seeded"
+data = noisypolynomial(x₀, θ, noisemix2; n=nf, seed=11) 
 plot(data)
 
 # assume that data are coming from order 1 markovian process then y = F(lagged_x)
@@ -47,7 +47,7 @@ Random.seed!(1);g=NeuralNet(Chain(Dense(1,10,tanh), Dense(10,1)))
     filename = "/sims/logistic/npbnn/"
 end
 
-@time est = reconstruct();
+@time est = npbnn();
 
 
 zpl, zpr = -0.5, 0.5;
@@ -122,7 +122,7 @@ Random.seed!(1);g=NeuralNet(Chain(Dense(1,10,tanh), Dense(10,1)))
 end
 
 
-@time pest = bnnparametric()
+@time pest = arbnn()
 xrange=range(-0.5, stop=0.5, length=100)
 varhat = 1/sqrt(mean(pest.taus[2001:10:end]))
 noiseplot = plot(xrange, pdf.(Normal(0,varhat^0.5), xrange), color=:red, lw=1.5, label=L"\mathrm{est }\hat{f}(z)", grid=:false) #histogram(zp, bins=200, normalize=:pdf, color=:lavender, label="predictive");
