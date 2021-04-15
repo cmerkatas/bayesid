@@ -4,7 +4,7 @@ Tools for Bayesian system identification.
 bayesid delivers methods for System Identification using Bayesian neural networks with nonparametric noise processes [1]. Additionally, a autoregressive Bayesian neural network similar to [2] is implemented.
 
 # Dependencies
-It is assumed that the user has or is able to install ```julia```. This project has been developed in ```julia v1.5.3```.
+It is assumed that the user has or is able to install ```julia```. This project has been developed in ```julia v1.6.0```.
 
 # Code structure
 The core files regarding the methods illustrated in [1] are located in ```src``` folder. Subfolders ```mcmc``` and ```models``` contain code for the Hamiltonian Monte Carlo sampler [*] and ```structs``` to implement neural networks using ```Flux```, similar to neural networks implemented at ```Pkg DiffEqFlux.jl```.
@@ -18,11 +18,12 @@ The folder ```examples``` contains simple scripts for running the sampler on dat
 # Environment activation
 In order to install all dependencies in the current state, start ```julia``` from the location
 ```bayesid```  is downloaded.
-The project folder contains ```Manifest.toml``` and ```Project.toml``` files so you can type in the ```REPL```.
+The project folder contains ```Manifest.toml``` and ```Project.toml``` files so you can type in the ```REPL```
 
 ```julia
-julia> Pkg.activate(".")
-julia> Pkg.instantiate()
+julia> ]
+(@v1.6) pkg> activate .
+(bayesid)> instantiate
 ```
 This will make ```julia``` install all the necessary packages and dependencies for the project.
 
