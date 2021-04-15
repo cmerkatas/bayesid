@@ -25,10 +25,10 @@ julia> ]
 (@v1.6) pkg> activate .
 (bayesid)> instantiate
 ```
-This will make ```julia``` install all the necessary packages and dependencies for the project.
+This will make ```julia``` install all the necessary packages and dependencies for the available functions.
 
 # A simulated data example
-Having complete the installation process we can run an example by first loading necessary packages and files
+Having completed the installation process we can run an example by first loading necessary packages and files
 ```julia
 using Plots, Random, Distributions, Flux, Zygote, LinearAlgebra, StatsBase, StatsPlots, KernelDensity
 using DelimitedFiles, LaTeXStrings
@@ -40,18 +40,19 @@ include("../src/utils.jl")
 include("../src/npbnn.jl")
 ```
 
-Next, we generate some data from logistic map
+Next, we generate some data from logistic map     T<sub>&theta;</sub>(x) = 1-&theta;x<sup>2</sup> for the parameter &theta;=1.71.
+
 
 ```julia
 nf = 210
 ntrain = 200
-θ = [1.,0.,-1.71]
+θ = [1.,0.,-1.71] # coefficients of polynomial Tθ
 x₀ = .5
 data = noisypolynomial(x₀, θ, noisemix2; n=nf, seed=11)
 plot(data)
 ```
 
-Assuming that the data are coming from order 1 Markovian process then we construct the delayed time series
+Assuming that the data are coming from order 1 Markovian process, we construct the delayed time series
 ```julia
 ytemp = data[1:ntrain]
 D = embed(ytemp, 2)
