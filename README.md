@@ -3,10 +3,6 @@ Tools for Bayesian system identification.
 
 bayesid delivers methods for System Identification using Bayesian neural networks with nonparametric noise processes [1]. Additionally, a autoregressive Bayesian neural network similar to [2] is implemented.
 
-nbin contains code for Bayesian nonparametric density estimation with
-stochastic decreasing weights priors based on random measures with weights that
-are equally weighted negative binomial mixtures.
-
 # Dependencies
 It is assumed that the user has or is able to install ```julia```.
 
@@ -91,3 +87,7 @@ end
 
 @time est = reconstruct();
 ```
+# References
+[1] Merkatas, C., & Särkkä, S. (2021). *System identification using Bayesian neural networks with nonparametric noise processes.* (submitted)
+
+[2] Nakada, Y., Matsumoto, T., Kurihara, T., & Yosui, K. (2005). *Bayesian reconstructions and predictions of nonlinear dynamical systems via the hybrid Monte Carlo scheme*. Signal processing, 85(1), 129-145.
