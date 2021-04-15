@@ -14,6 +14,8 @@ Scripts for simulating the logistic data as well as the real data used in the pa
 
 The folder ```examples``` contains simple scripts for running the sampler on data from ```data``` folder.
 
+[*] hmc.jl is based on an implementation in SGMCMC.jl--see ```src/mcmc/LICENSE```.
+
 # Environment activation
 In order to install all dependencies in the current state, start ```julia``` from the location
 ```bayesid```  is downloaded.
@@ -85,7 +87,7 @@ Random.seed!(1);g=NeuralNet(Chain(Dense(1,10,tanh), Dense(10,1)))
     filename = "/sims/logistic/npbnn/"
 end
 
-@time est = reconstruct();
+@time est = npbnn();
 ```
 # References
 [1] Merkatas, C., & Särkkä, S. (2021). *System identification using Bayesian neural networks with nonparametric noise processes.* (submitted)
