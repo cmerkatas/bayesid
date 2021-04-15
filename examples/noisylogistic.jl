@@ -73,21 +73,21 @@ println(metrics)
 
 # prediction plot with stds
 tsteps=1:210;
-newplt = scatter(data, colour = :blue, label = "Data", ylim = (-1.5, 2.), grid=:false);
+newplt = StatsPlots.scatter(data, colour = :blue, label = "data", ylim = (-1.5, 2.), grid=:false);
 plot!(newplt, [200], seriestype =:vline, colour = :green, linestyle =:dash, label = "training data end");
 
 thinned = est.weights[2001:50:end,:];
 fit, sts = predictions(xtrain, thinned);
 plot!(newplt, tsteps[size(xtrain,1)+1:200], mean(fit,dims=1)', colour=:black, label=nothing);
-plot!(newplt, tsteps[size(xtrain,1)+1:200], mean(fit,dims=1)', ribbon=sts, alpha=0.4, colour =:blue, label="fitted model");
-plot!(newplt, tsteps[length(ytemp)+1:end], ŷ', ribbon=ŷstd, colour =:purple, alpha=0.4, label="preditions")
+plot!(newplt, tsteps[size(xtrain,1)+1:200], mean(fit,dims=1)', ribbon=sts, alpha=0.4, colour =:blue, label="np-bnn fitted model");
+plot!(newplt, tsteps[length(ytemp)+1:end], ŷ', ribbon=ŷstd, colour =:purple, alpha=0.4, label="np-bnn preditions")
 display(newplt)
 # savefig(newplt, "sims/logistic/npbnn/seed1/figures/logisticfit-pred-std.pdf")
 
 # zoomed plot
 tsteps = 1:210
-zoomplt = scatter(tsteps[ntrain+1:end], ytest, colour = :blue, label = "Data", ylim=(-1.5, 2), grid=:false)
-plot!(zoomplt, tsteps[ntrain+1:end], ŷ', color=:purple, ribbon=ŷstd', alpha=0.4,label="prediction")
+zoomplt = scatter(tsteps[ntrain+1:end], ytest, colour = :blue, label = "data", ylim=(-1.5, 2), grid=:false)
+plot!(zoomplt, tsteps[ntrain+1:end], ŷ', color=:purple, ribbon=ŷstd', alpha=0.4,label="np-bnn prediction")
 # savefig(zoomplt, "sims/logistic/npbnn/seed1/figures/logisticzoompred-std.pdf")
 
 

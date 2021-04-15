@@ -7,12 +7,14 @@ include("../src/utils.jl")
 include("../src/reconstruct.jl")
 include("/Users/cmerkatas/github/GSBR/src/ToolBox.jl")
 
-""" load the results for noise and plot
+gr() #backend
 """
-npnoise = readdlm("sims/newlog/samples/sampled_noise.txt")
+load the results for noise and plot
+"""
+npnoise = readdlm("sims/logistic/npbnn/seed1/samples/sampled_noise.txt")
 gsbnoise = readdlm("../GSBR/sims/logistic/gsbr_seed1/noise.txt")
 gsbnoise = gsbnoise[5001:end]
-partaus = readdlm("sims/parametric/parametric1/samples/samplessampledtaus.txt")[5001:end]
+partaus = readdlm("sims/logistic/bnnparametric/seed1/samples/sampledtaus.txt")[2001:end]
 parsigma = sqrt(1.0./mean(partaus))
 
 zpl, zpr = -0.5, 0.5;
@@ -25,15 +27,14 @@ noiseplot = plot(xrange, ddnoise,
         xlabel="z", ylabel="Density",
         color=:black, lw=1.2, label="true f(z)", grid=:false)
 
-plot!(noiseplot, kde(npnoise), color=:blue, lw=1.3, label="npbnn", grid=:false)
+plot!(noiseplot, kde(npnoise), color=:blue, lw=1.3, label="np-bnn", grid=:false)
 plot!(noiseplot, kde(npnoise), line = (:dash, 1.2, :red), label="gsbr", grid=:false)
-plot!(noiseplot, xrange, pdf.(Normal(0, parsigma), xrange), lw=1.2, color=:orange, label="arbnn", grid=:false)
-savefig(noiseplot, "sims/newlog/figures/noisecomparison.pdf")
+plot!(noiseplot, xrange, pdf.(Normal(0, parsigma), xrange), lw=1.2, color=:orange, label="ar-bnn", grid=:false)
+savefig(noiseplot, "sims/logistic/pubfigs/noisecomparison.pdf")
 
 """
 load the results for estimation and prediction
 """
-
 # generate the data
 # generate some data from logistic map
 nf = 210
@@ -51,18 +52,18 @@ xtrain = hcat(copy(D[:, 2])...)
 ytest = data[ntrain+1:end]
 g=NeuralNet(Chain(Dense(1,10,tanh), Dense(10,1)))
 
-nppredictions = zeros(35000, 10)
-gsbrpredictions = similar(nppredictions)
+nppredictions = zeros(40000, 10)
+gsbrpredictions = zeros(35000, 10)
 parpredictions = similar(nppredictions)
 for t in 1:1:10
-        nppredictions[:, t] = readdlm("sims/newlog/samples/sampled_pred$t.txt")
+        nppredictions[:, t] = readdlm("sims/logistic/npbnn/seed1/samples/sampled_pred$t.txt")
         gsbrpredictions[:, t] = readdlm("../GSBR/sims/logistic/gsbr_seed1/xpred$t.txt")
-        parpredictions[:, t] = readdlm("sims/parametric/parametric1/samples/samplessampled_pred$t.txt")
+        parpredictions[:, t] = readdlm("sims/logistic/bnnparametric/seed1/samples/sampled_pred$t.txt")
 end
 
 # load the weights
-npweights = readdlm("sims/newlog/samples/sampled_weights.txt")
-parweights = readdlm("sims/newlog/samples/sampled_weights.txt")
+npweights = readdlm("sims/logistic/npbnn/seed1/samples/sampled_weights.txt")
+parweights = readdlm("sims/logistic/bnnparametric/seed1/samples/sampledweights.txt")
 thetas =   readdlm("../GSBR/sims/logistic/gsbr_seed1/thetas.txt")
 tsteps = 1:nf
 gsbfit = zeros(size(thetas, 1), length(xtrain))
@@ -76,12 +77,12 @@ end
 gsbsts = std(gsbfit, dims=1)
 
 # std plots
-stdplt = scatter(data, colour = :blue, label = "Data", ylim=(-1.5, 2), grid=:false)
+stdplt = StatsPlots.scatter(data, colour = :blue, label = "Data", ylim=(-1.5, 2), grid=:false)
 plot!(stdplt, [ntrain], seriestype =:vline, colour = :green, linestyle =:dash, label = "Training Data End")
 
 npfit, npsts = predictions(xtrain, npweights);
 plot!(stdplt, tsteps[2:ntrain], mean(npfit,dims=1)', ribbon = npsts, alpha=0.4, colour =:blue, label = "fitted model")
-plot!(stdplt, tsteps[ntrain+1:end], mean(nppredictions, dims=1)', color=:purple, ribbon=std(nppredictions,dims=1)', alpha=0.4,label="prediction")
+plot!(stdplt, tsteps[ntrain+1:end], mean(nppredictions, dims=1)', color=:purple, ribbon=std(nppredictions, dims=1)', alpha=0.4,label="prediction")
 
 # predsplt = scatter(tsteps[ntrain+1:end], ytest, colour = :blue, label = "Data", ylim=(-1.5, 2), grid=:false)
 # plot!(predsplt, tsteps[ntrain+1:end], mean(nppredictions, dims=1)', color=:purple, ribbon=std(nppredictions, dims=1)', alpha=0.4, label="npbnn prediction")
@@ -99,3 +100,5 @@ Flux.mse(parpredhat, ytest)
 Flux.mae(nppredhat, ytest)
 Flux.mae(gsbpredhat, ytest)
 Flux.mae(parpredhat, ytest)
+
+evaluationmetrics(gsbpredhat, ytest)

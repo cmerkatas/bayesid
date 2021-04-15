@@ -82,15 +82,6 @@ function reconstruct(; kws...)
         if its > burnin
             zp[its-burnin] = samplepredictive(w, tau, at, bt)
 
-            # if T > 0
-            #     for t in 1:T
-            #         meanstar = g(x[:,ntemp+t], current_ws.x)[1]
-            #         varstar = 1.0 ./ tau[d[ntemp+t]]
-            #         y[ntemp+t] = meanstar#, varstar^0.5))
-            #         x[:,ntemp+t] = copy(reverse(y[ntemp+t-lags:ntemp+t-1]))
-            #         preds[t][its-burnin] = y[ntemp+t]
-            #     end
-            # end
         end
 
         if mod(its, verbose_every)==0
@@ -116,8 +107,7 @@ function reconstruct(; kws...)
         for t in 1:T
             x[:,ntemp+t] = copy(reverse(y[ntemp+t-lags:ntemp+t-1]))
             meanstar = g(x[:,ntemp+t], sampled_ws[j,:])[1]
-            #varstar = 1.0 ./ tau[d[ntemp+t]]
-            y[ntemp+t] = meanstar#, varstar^0.5))
+            y[ntemp+t] = meanstar
             preds[t][j] = y[ntemp+t]
         end
     end
