@@ -14,12 +14,12 @@ function npbnn(; kws...)
     maxiter, burnin = args.maxiter, args.burnin
     verbose_every = args.verb
 
-    @assert size(x,2)==length(y)
+    @assert size(x,2) == length(y)
     n = length(y)
 
     hyper_taus = args.hyper_taus
 
-    geop, ap, bp = args.geop, args.ap ,args.bp # alpha and beta hyperparameter for the geometric probability
+    geop, ap, bp = args.geop, args.ap, args.bp # alpha and beta hyperparameter for the geometric probability
     at, bt = args.at, args.bt # precision gamma hyperparameter alpha
 
     # HMC tuning params
@@ -48,11 +48,11 @@ function npbnn(; kws...)
     acc_ratio = 0.0
 
     # start main mcmc loop
-    for its in 1:maxiter
+    for its in 1:1:maxiter
         Nstar = maximum(N)
 
         # construct geometric weights
-        w = geometricstickbreak(geop,Nstar)
+        w = geometricstickbreak(geop, Nstar)
 
         # sample atoms
         tau = sampleatoms(g, current_ws, y, x, d, Nstar, at, bt)
@@ -66,7 +66,6 @@ function npbnn(; kws...)
         geoprob[its] = geop
 
         # update prior sigma for the weights
-        #prior_sigma = samplesigma(g, current_ws, y, x, as, bs)
         hyper_taus = samplehypertaus(g, hyper_taus, ataus, btaus)
         sampled_hypertaus[its] = hyper_taus
 
@@ -78,25 +77,25 @@ function npbnn(; kws...)
         sampled_ws[its,:] = current_ws.x
 
 
-        # sample predictive
+        # sample noise predictive
         if its > burnin
             zp[its-burnin] = samplepredictive(w, tau, at, bt)
 
         end
 
-        if mod(its, verbose_every)==0
+        if mod(its, verbose_every) == 0
             println("MCMC iterations: $its out of $maxiter")
             println("Acceptance ratio: $(acc_ratio/its)")
             println("# of clusters: $(mean(clusters[its]))")
         end
     end
 
-    # predict
+    # predict T future values
     T = args.npredict
-    lags = size(x,1)
+    lags = size(x, 1)
     if T > 0
-        y = hcat(y, zeros(1,T))
-        for t in 1:T
+        y = hcat(y, zeros(1, T))
+        for t in 1:1:T
             x = hcat(x, reverse(y[ntemp+t-lags:ntemp+t-1]))
         end
     end
@@ -104,10 +103,10 @@ function npbnn(; kws...)
     for t in 1:1:T
       preds[t] = zeros(maxiter)
     end
-    for j in 1:1:size(sampled_ws,1)
-        for t in 1:T
-            x[:,ntemp+t] = copy(reverse(y[ntemp+t-lags:ntemp+t-1]))
-            meanstar = g(x[:,ntemp+t], sampled_ws[j,:])[1]
+    for j in 1:1:size(sampled_ws, 1)
+        for t in 1:1:T
+            x[:, ntemp+t] = copy(reverse(y[ntemp+t-lags:ntemp+t-1]))
+            meanstar = g(x[:, ntemp+t], sampled_ws[j, :])[1]
             y[ntemp+t] = meanstar
             preds[t][j] = y[ntemp+t]
         end

@@ -9,17 +9,17 @@ function geometricstickbreak(p::Float64, Nstar::Int64)
 end
 
 
-function sampleatoms(g::NeuralNet, ws::HMCState, y::Array{Float64,2}, x::Array{Float64,2}, d::Array{Int64,1}, Nstar::Int64, a::Float64, b::Float64)
-    @assert size(x,2)==length(y)
+function sampleatoms(g::NeuralNet, ws::HMCState, y::Array{Float64, 2}, x::Array{Float64, 2}, d::Array{Int64, 1}, Nstar::Int64, a::Float64, b::Float64)
+    @assert size(x, 2) == length(y)
     @assert (a > zero(a)) & (b > zero(b))
-    n = size(x,2)
+    n = size(x, 2)
     atoms = zeros(Nstar)
     @inbounds for j in 1:1:Nstar
         term, counts = 0.0, 0
         @inbounds for i in 1:1:n
-            if d[i].==j
+            if d[i] .== j
                 counts += 1
-                term += (y[i] - g(x[:,i], ws.x)[1])^2
+                term += (y[i] - g(x[:, i], ws.x)[1])^2
             end
         end
         atoms[j] = rand(Gamma(a + 0.5counts, (b + 0.5term)^(-1)))
@@ -33,19 +33,19 @@ function tgeornd(pp::Float64, k::Int64)
 end
 
 
-function sampleclusters(g::NeuralNet, ws::HMCState, y::Array{Float64,2}, x::Array{Float64,2}, atoms::Array{Float64,1}, Nis::Array{Int64,1}, geop::Float64)
-    @assert size(x,2)==length(y)
-    n = size(x,2)
-    clusters, slices = zeros(Int64,n), zeros(Int64,n)
+function sampleclusters(g::NeuralNet, ws::HMCState, y::Array{Float64, 2}, x::Array{Float64, 2}, atoms::Array{Float64, 1}, Nis::Array{Int64, 1}, geop::Float64)
+    @assert size(x, 2) == length(y)
+    n = size(x, 2)
+    clusters, slices = zeros(Int64, n), zeros(Int64, n)
     @inbounds for i in 1:1:n
         nc = 0
         @inbounds for k in 1:Nis[i]
-            nc += atoms[k]^(0.5) * exp(-0.5atoms[k] * (y[i] - g(x[:,i], ws.x)[1]).^2)
+            nc += atoms[k]^(0.5) * exp(-0.5atoms[k] * (y[i] - g(x[:, i], ws.x)[1]).^2)
         end
         probs = 0.0
         uu = rand()
         @inbounds for k in 1:Nis[i]
-            probs += atoms[k]^(0.5) * exp(-0.5atoms[k] * (y[i] - g(x[:,i], ws.x)[1]).^2) / nc
+            probs += atoms[k]^(0.5) * exp(-0.5atoms[k] * (y[i] - g(x[:, i], ws.x)[1]).^2) / nc
             if uu < probs
                 clusters[i] = k
                 slices[i] = tgeornd(geop, clusters[i])
@@ -64,7 +64,7 @@ function sampleprob(ap::Float64, bp::Float64, n::Int64, N::Array{Int64,1})
 end
 
 
-function samplepredictive(w::Array{Float64,1}, atoms::Array{Float64,1}, a::Float64, b::Float64)
+function samplepredictive(w::Array{Float64, 1}, atoms::Array{Float64, 1}, a::Float64, b::Float64)
     @assert (a > zero(a)) & (b > zero(b))
     W = cumsum(w)
     rd = rand()
@@ -79,11 +79,11 @@ function samplepredictive(w::Array{Float64,1}, atoms::Array{Float64,1}, a::Float
 end
 
 
-function predictions(x::Array{Float64,2}, weights::Array{Float64,2})
+function predictions(x::Array{Float64, 2}, weights::Array{Float64, 2})
     np, _ = size(weights)
     preds = zeros(np, size(x,2))
     @inbounds for i in 1:1:np
-        preds[i,:] = g(x, weights[i,:])
+        preds[i, :] = g(x, weights[i, :])
     end
     stds = std(preds, dims=1)
     return preds, stds
@@ -92,7 +92,7 @@ end
 
 function samplehypertaus(g::NeuralNet, hyper_taus::Array{Float64, 2}, alphas, betas)
     updated_taus = similar(hyper_taus)
-    for l in 1:length(g.nnet)
+    for l in 1:1:length(g.nnet)
         weights, biases = g.nnet[l].W, g.nnet[l].b
         alpha_weights = alphas[1,l] + 0.5length(weights)
         alpha_biases = alphas[2,l] + 0.5length(biases)
@@ -111,11 +111,11 @@ function predict(g::NeuralNet, ws::HMCState, x_::Float64, sig::Float64)
     return rand(Normal(meanstar, sig))
 end
 
-function predictions(x::Array{Float64,2}, weights::Array{Float64,2})
+function predictions(x::Array{Float64, 2}, weights::Array{Float64, 2})
     np, _ = size(weights)
-    preds = zeros(np, size(x,2))
+    preds = zeros(np, size(x, 2))
     @inbounds for i in 1:1:np
-        preds[i,:] = g(x, weights[i,:])
+        preds[i, :] = g(x, weights[i, :])
     end
     stds = std(preds, dims=1)
     return preds, stds

@@ -58,8 +58,8 @@ metrics = evaluationmetrics(ŷ , ytest);
 println(metrics)
 
 # uncomment and change location accordingly
-# writedlm("sims/lynx/npbnn/seed123/metrics.txt", hcat(metrics...))
-# writedlm("sims/lynx/npbnn/seed123/ypred.txt", vcat(ŷ,ŷstd)')
+#writedlm("sims/lynx/npbnn/seed123/metrics.txt", hcat(metrics...))
+#writedlm("sims/lynx/npbnn/seed123/ypred.txt", vcat(ŷ,ŷstd)')
 
 # prediction plot with stds
 tsteps=1:114;

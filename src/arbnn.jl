@@ -50,7 +50,6 @@ function arbnn(; kws...)
         tau = rand(Gamma(alphastar, 1.0/betastar))
 
         # update prior sigma for the weights
-        #prior_sigma = samplesigma(g, current_ws, y, x, as, bs)
         hyper_taus = samplehypertaus(g, hyper_taus, ataus, btaus)
         sampled_hypertaus[its] = hyper_taus
 
@@ -70,12 +69,12 @@ function arbnn(; kws...)
         end
     end
 
-    # predict
+    # predict future T values
     T = args.npredict
-    lags = size(x,1)
+    lags = size(x, 1)
     if T > 0
-        y = hcat(y, zeros(1,T))
-        for t in 1:T
+        y = hcat(y, zeros(1, T))
+        for t in 1:1:T
             x = hcat(x, reverse(y[ntemp+t-lags:ntemp+t-1]))
         end
     end
@@ -84,10 +83,10 @@ function arbnn(; kws...)
       preds[t] = zeros(maxiter)
     end
     if T > 0
-        for j in 1:1:size(sampled_ws,1)
-            for t in 1:T
+        for j in 1:1:size(sampled_ws, 1)
+            for t in 1:1:T
                 x[:,ntemp+t] = copy(reverse(y[ntemp+t-lags:ntemp+t-1]))
-                meanstar = g(x[:,ntemp+t], sampled_ws[j,:])[1]
+                meanstar = g(x[:, ntemp+t], sampled_ws[j, :])[1]
                 varstar = 1.0 ./ sampledtau[j]
                 y[ntemp+t] = rand(Normal(meanstar, sqrt(varstar)))
                 preds[t][j] = y[ntemp+t]
@@ -104,8 +103,8 @@ function arbnn(; kws...)
         for t in 1:T
             writedlm(string(savelocation, "sampled_pred$t.txt"), preds[t])
         end
-        return est=(weights=sampled_ws[burnin+1:end,:], taus=sampledtau, precisions=sampled_hypertaus, predictions=preds)
+        return est=(weights=sampled_ws[burnin+1:end, :], taus=sampledtau, precisions=sampled_hypertaus, predictions=preds)
     else
-        return est=(weights=sampled_ws[burnin+1:end,:], taus=sampledtau, precisions=sampled_hypertaus)
+        return est=(weights=sampled_ws[burnin+1:end, :], taus=sampledtau, precisions=sampled_hypertaus)
     end
 end

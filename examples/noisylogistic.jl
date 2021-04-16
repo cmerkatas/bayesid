@@ -138,8 +138,8 @@ ŷ = mean(hcat(pest.predictions...)[2001:50:end, :], dims=1)
 ŷstd = std(hcat(pest.predictions...)[2001:50:end, :], dims=1)
 metrics = evaluationmetrics(ŷ , ytest);
 println(metrics)
-# writedlm("sims/logistic/bnnparametricnoninf/seed1/metrics.txt", hcat(metrics...))
-# writedlm("sims/logistic/bnnparametricnoninf/seed1/ypred.txt", vcat(ŷ,ŷstd)')
+# writedlm("sims/logistic/arbnn/seed1/metrics.txt", hcat(metrics...))
+# writedlm("sims/logistic/arbnn/seed1/ypred.txt", vcat(ŷ,ŷstd)')
 
 # prediction plot with stds
 tsteps=1:210;
@@ -152,4 +152,4 @@ plot!(newplt, tsteps[size(xtrain,1)+1:200], mean(fit,dims=1)', colour=:black, la
 plot!(newplt, tsteps[size(xtrain,1)+1:200], mean(fit,dims=1)', ribbon=sts, alpha=0.4, colour =:blue, label="fitted model");
 plot!(newplt, tsteps[length(ytemp)+1:end], ŷ', ribbon=ŷstd, colour =:purple, alpha=0.4, label="preditions")
 display(newplt)
-# savefig(newplt, "sims/logistic/npbnn/seed1/figures/logisticfit-pred-std.pdf")
+# savefig(newplt, "sims/logistic/arbnn/seed1/figures/logisticfit-pred-std.pdf")

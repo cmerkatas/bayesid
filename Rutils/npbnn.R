@@ -17,7 +17,7 @@ ntrain = 100
 ytrain = data[1:ntrain]
 ytest = data[(ntrain+1):length(data)]
 
-# Fit an arima model to train data
+# Fit an ar model to train data
 lynx.ar = ar(ytrain)
 lynx.ar
 
@@ -25,11 +25,12 @@ predictions = predict(lynx.ar, n.ahead=14)
 yhat = predictions$pred
 yhat
 
-metrics(yhat, ytest) 
+metrics(yhat, ytest)
 
 ts.plot(yhat)
 points(101:114,ytest)
 
+# fit a neural network to data
 library("forecast", lib.loc="/Library/Frameworks/R.framework/Versions/3.5/Resources/library")
 nnfit = nnetar(window(data, end=1920), p=2, size=10, decay=0.05, maxit=150)
 nnpred = forecast(nnfit, h=14, model=nnfit)$mean
