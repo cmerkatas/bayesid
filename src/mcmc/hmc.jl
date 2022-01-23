@@ -26,7 +26,7 @@ end
 """
 sample! performs one HMC update
 """
-function samplestep(f::NeuralNet,s::HMCState,U::Function,∇U::Function,taus::Union{Float64, Array{Float64,1}},tau_preconditioner,y::Array{Float64,2},x::Array{Float64,2})
+function samplestep(f::NeuralNet, s::HMCState, Uf::Function, ∇Uf::Function, taus::Union{Float64, Array{Float64,1}, Vector{Matrix{Float64}}}, tau_preconditioner, y::Array{Float64,2}, x::Array{Float64,2})
   # hamiltonian monte carlo (radford neal's version)
   acc_flag = 0
   nparams = length(s.x)
@@ -37,13 +37,13 @@ function samplestep(f::NeuralNet,s::HMCState,U::Function,∇U::Function,taus::Un
   s.p = sqrt.(mass).*randn(nparams)
   curx = s.x
   curp = s.p
-  s.p += .5*stepsize .* ∇U(f,s.x,y,x,taus,tau_preconditioner)
+  s.p += .5*stepsize .* ∇Uf(f, s.x, y, x, taus, tau_preconditioner)
   for iter = 1:niters
     s.x += stepsize * s.p./mass
-    s.p += (iter<niters ? stepsize : .5*stepsize) .* ∇U(f,s.x,y,x,taus,tau_preconditioner) # two leapfrog steps rolled in one unless at the end.
+    s.p += (iter<niters ? stepsize : .5*stepsize) .* ∇Uf(f,s.x,y,x,taus,tau_preconditioner) # two leapfrog steps rolled in one unless at the end.
   end
 
-  logaccratio = U(f,s.x,y,x,taus,tau_preconditioner) - U(f,curx,y,x,taus,tau_preconditioner) -.5*sum((s.p.*s.p - curp.*curp)./mass)[1]
+  logaccratio = Uf(f,s.x,y,x,taus,tau_preconditioner) - Uf(f,curx,y,x,taus,tau_preconditioner) -0.5*sum((s.p.*s.p - curp.*curp)./mass)[1]
   if 0.0 > logaccratio - log(rand())
       #reject
       s.x = curx

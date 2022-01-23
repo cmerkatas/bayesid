@@ -28,6 +28,24 @@ function sampleatoms(g::NeuralNet, ws::HMCState, y::Array{Float64, 2}, x::Array{
 end
 
 
+function sampleatomswishart(g::NeuralNet, ws::HMCState, y::Array{Float64, 2}, x::Array{Float64, 2}, d::Array{Int64, 1}, Nstar::Int64, ν₀::Float64, Λ₀::Matrix{Float64})
+    @assert size(x) === size(y)
+    dst, n = size(x)
+    atoms = [zeros(dst, dst) for i in 1:1:Nstar]
+    @inbounds for j in 1:1:Nstar
+        term, counts = zeros(dst, dst), 0
+        @inbounds for i in 1:1:n
+            if d[i] .== j
+                counts += 1
+                term .+= (y[:, i] .- g(x[:, i], ws.x)) * (y[:, i] .- g(x[:, i], ws.x))'
+            end
+        end
+        atoms[j] = rand(Wishart(ν₀ + counts, (Λ₀ + term) \ I))
+    end
+    return atoms
+end
+
+
 function tgeornd(pp::Float64, k::Int64)
     return rand(Geometric(pp)) + k
 end
@@ -58,6 +76,31 @@ function sampleclusters(g::NeuralNet, ws::HMCState, y::Array{Float64, 2}, x::Arr
 end
 
 
+function sampleclusterswishart(g::NeuralNet, ws::HMCState, y::Array{Float64, 2}, x::Array{Float64, 2}, atoms::Vector{Matrix{Float64}}, Nis::Array{Int64, 1}, geop::Float64)
+    @assert size(x) == size(y)
+    dst, n = size(x)
+    clusters, slices = zeros(Int64, n), zeros(Int64, n)
+    @inbounds for i in 1:1:n
+        nc = 0
+        @inbounds for k in 1:Nis[i]
+            nc += det(atoms[k]) * exp(-0.5 * (y[:, i] .- g(x[:, i], ws.x))' * atoms[k] * (y[:, i] .- g(x[:, i], ws.x)))
+        end
+        probs = 0.0
+        uu = rand()
+        @inbounds for k in 1:Nis[i]
+            probs += det(atoms[k]) * exp(-0.5 * (y[:, i] .- g(x[:, i], ws.x))' * atoms[k] * (y[:, i] .- g(x[:, i], ws.x))) / nc
+            if uu < probs
+                clusters[i] = k
+                slices[i] = tgeornd(geop, clusters[i])
+                break
+            end
+        end
+    end
+
+    return clusters, slices
+end
+
+
 function sampleprob(ap::Float64, bp::Float64, n::Int64, N::Array{Int64,1})
     @assert (ap > zero(ap)) & (bp > zero(bp))
     return rand(Beta(ap + 2n, bp + sum(N) - n))
@@ -75,6 +118,21 @@ function samplepredictive(w::Array{Float64, 1}, atoms::Array{Float64, 1}, a::Flo
         cmpnent = StatsBase.sample(Weights(w))
         tau_star = atoms[cmpnent]
         return rand(Normal(0.0, 1/atoms[cmpnent]^0.5))
+    end
+end
+
+
+function samplepredictivewishart(w::Array{Float64, 1}, atoms::Vector{Matrix{Float64}}, ν₀::Float64, Λ₀::Matrix{Float64})
+    W = cumsum(w)
+    rd = rand()
+    dst = size(Λ₀, 1)
+    if rd .> W[end]
+        tau_star = rand(Wishart(ν₀, Λ₀ \ I))
+        return rand(MultivariateNormal(zeros(dst), tau_star))
+    else
+        cmpnent = StatsBase.sample(Weights(w))
+        tau_star = Symmetric(atoms[cmpnent])
+        return rand(MultivariateNormal(zeros(dst), inv(tau_star)))
     end
 end
 
