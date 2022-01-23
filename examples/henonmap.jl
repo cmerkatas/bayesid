@@ -41,7 +41,7 @@ Random.seed!(1);g=NeuralNet(Chain(Dense(2,5,tanh), Dense(5,2)))
     seed = 1
     stepsize = 0.0015
     numsteps = 3
-    verb = 50
+    verb = 1
     npredict = 10
     filename = "/sims/henon/npbnn/"
 end

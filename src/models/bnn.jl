@@ -62,7 +62,7 @@ function UW(g::NeuralNet,
            tau::Vector{Matrix{Float64}},
            tau_preconditioner::Vector)
     g.ws = new_w
-    u =@views -0.5sum([(view(y, :, i) .- g(view(x, :, i), g.ws))' * view(tau[i], :, :) * (view(y, :, i) .- g(view(x, :, i), g.ws)) for i in 1:1:size(y, 2)])
+    u = -0.5sum([(view(y, :, i) .- g(view(x, :, i), g.ws))' * view(tau[i], :, :) * (view(y, :, i) .- g(view(x, :, i), g.ws)) for i in 1:1:size(y, 2)])
         - 0.5norm(sqrt.(tau_preconditioner) .* g.ws)^2
     return u
 end
@@ -76,7 +76,6 @@ function ∇UW(g::NeuralNet,
             tau::Vector{Matrix{Float64}},
             tau_preconditioner::Vector)
    g.ws = new_w
-   ps = Flux.params(g.ws)
    gs = Zygote.gradient(UW, g, g.ws, y, x, tau, tau_preconditioner)[2]
    return gs
 end

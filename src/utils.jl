@@ -122,7 +122,7 @@ function samplepredictive(w::Array{Float64, 1}, atoms::Array{Float64, 1}, a::Flo
 end
 
 
-function samplepredictivewishart(w::Array{Float64, 1}, atoms::Vector{Matrix{Float64}}, ν₀::Float64, Λ₀::Matrix{Float64})
+function samplepredictivewishart(w::Array{Float64, 1}, atoms::Vector{Matrix{Float64}}, ν₀::Int64, Λ₀::Matrix{Float64})
     W = cumsum(w)
     rd = rand()
     dst = size(Λ₀, 1)
