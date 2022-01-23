@@ -20,14 +20,14 @@ ytrain = copy(data[:, 2:end])
 xtrain = copy(data[:, 1:end-1])
 ytest = copy(data[:, ntrain+1:end])
 
-Random.seed!(1);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,2)))
+Random.seed!(1);g=NeuralNet(Chain(Dense(2,5,tanh), Dense(5,2)))
 
 # arguments for the main sampler
 Σ₀ = [1e3 -1;-1 1e3]
 @with_kw mutable struct Args
     net = g
-    maxiter = 40000 # maximum number of iterations
-    burnin = 20000 # burnin iterations
+    maxiter = 30000 # maximum number of iterations
+    burnin = 10000 # burnin iterations
     x = xtrain # lagged data
     y = ytrain
     geop = 0.5
@@ -41,7 +41,7 @@ Random.seed!(1);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,2)))
     seed = 1
     stepsize = 0.0015
     numsteps = 3
-    verb = 100
+    verb = 50
     npredict = 10
     filename = "/sims/henon/npbnn/"
 end

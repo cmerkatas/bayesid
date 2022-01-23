@@ -40,7 +40,7 @@ function sampleatomswishart(g::NeuralNet, ws::HMCState, y::Array{Float64, 2}, x:
                 term .+= (y[:, i] .- g(x[:, i], ws.x)) * (y[:, i] .- g(x[:, i], ws.x))'
             end
         end
-        atoms[j] = rand(Wishart(ν₀ + counts, (Λ₀ + term) \ I))
+        atoms[j] = rand(Wishart(ν₀ + counts, inv(Λ₀ + term)))
     end
     return atoms
 end
@@ -128,7 +128,7 @@ function samplepredictivewishart(w::Array{Float64, 1}, atoms::Vector{Matrix{Floa
     dst = size(Λ₀, 1)
     if rd .> W[end]
         tau_star = rand(Wishart(ν₀, Λ₀ \ I))
-        return rand(MultivariateNormal(zeros(dst), tau_star))
+        return rand(MultivariateNormal(zeros(dst), tau_star \ I))
     else
         cmpnent = StatsBase.sample(Weights(w))
         tau_star = Symmetric(atoms[cmpnent])

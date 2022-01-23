@@ -62,7 +62,7 @@ function UW(g::NeuralNet,
            tau::Vector{Matrix{Float64}},
            tau_preconditioner::Vector)
     g.ws = new_w
-    u = -0.5sum([(y[:, i] .- g(x[:, i], g.ws))' * tau[i] * (y[:, i] .- g(x[:, i], g.ws)) for i in 1:1:size(y, 2)])
+    u =@views -0.5sum([(view(y, :, i) .- g(view(x, :, i), g.ws))' * view(tau[i], :, :) * (view(y, :, i) .- g(view(x, :, i), g.ws)) for i in 1:1:size(y, 2)])
         - 0.5norm(sqrt.(tau_preconditioner) .* g.ws)^2
     return u
 end
