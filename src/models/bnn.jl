@@ -45,6 +45,6 @@ function ∇U(g::NeuralNet,
             tau_preconditioner::Vector)
    g.ws = new_w
    ps = Flux.params(g.ws)
-   gs=Zygote.gradient(g -> U(g, g.ws, y, x, tau, tau_preconditioner), g)[1].x.ws
+   gs=Zygote.gradient(g -> U(g, g.ws, y, x, tau, tau_preconditioner), g)[1].ws
    return gs
 end
