@@ -106,6 +106,7 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)))
     numsteps = 20
     verb = 1000
     npredict = 14
+    save=false
     filename = "/sims/lynx/arbnn"
 end
 

@@ -3,10 +3,11 @@ function arbnn(; kws...)
     args = PArgs(; kws...)
     args.seed > 0 && Random.seed!(args.seed)
 
-    savelocation = string(pwd(), args.filename, "/seed$(args.seed)/samples/")
-    figlocation =  string(pwd(), args.filename, "/seed$(args.seed)/figures/")
-    mkpath(figlocation)
-    mkpath(savelocation)
+    if args.save
+        savelocation = string(pwd(), args.filename, "/seed$(args.seed)/samples/")
+        figlocation =  string(pwd(), args.filename, "/seed$(args.seed)/figures/")
+        mkpath(savelocation)
+    end
 
     g = args.net # nnet
     x, y = args.x, args.y
@@ -94,14 +95,16 @@ function arbnn(; kws...)
         end
     end
 
-
-    writedlm(string(savelocation, "sampledweights.txt"), sampled_ws)
-    writedlm(string(savelocation, "sampledtaus.txt"), sampledtau)
-    writedlm(string(savelocation, "sampledprecisions.txt"), sampled_hypertaus)
-
+    if args.save
+        writedlm(string(savelocation, "sampledweights.txt"), sampled_ws)
+        writedlm(string(savelocation, "sampledtaus.txt"), sampledtau)
+        writedlm(string(savelocation, "sampledprecisions.txt"), sampled_hypertaus)
+    end
     if T > 0
-        for t in 1:T
-            writedlm(string(savelocation, "sampled_pred$t.txt"), preds[t])
+        if args.save
+            for t in 1:T
+                writedlm(string(savelocation, "sampled_pred$t.txt"), preds[t])
+            end
         end
         return est=(weights=sampled_ws[burnin+1:end, :], taus=sampledtau, precisions=sampled_hypertaus, predictions=preds)
     else
