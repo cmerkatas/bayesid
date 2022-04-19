@@ -47,7 +47,7 @@ function arbnn(; kws...)
 
         # sample atoms
         alphastar = at + 0.5n
-        betastar = bt + 0.5sum((y - g(x, current_ws.x)).^2)
+        betastar = bt + 0.5sum((y .- g(x, current_ws.x)).^2)
         tau = rand(Gamma(alphastar, 1.0/betastar))
 
         # update prior sigma for the weights
