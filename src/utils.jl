@@ -93,7 +93,7 @@ end
 function samplehypertaus(g::NeuralNet, hyper_taus::Array{Float64, 2}, alphas, betas)
     updated_taus = similar(hyper_taus)
     for l in 1:1:length(g.nnet)
-        weights, biases = g.nnet[l].W, g.nnet[l].b
+        weights, biases = g.nnet[l].weight, g.nnet[l].bias
         alpha_weights = alphas[1,l] + 0.5length(weights)
         alpha_biases = alphas[2,l] + 0.5length(biases)
 

@@ -21,10 +21,10 @@ y_fit = (y_fit .- mean(y_fit)) ./ std(y_fit)
 X_fit = Matrix(X_fit')
 y_fit = Matrix(y_fit')
 
-"""
+#=
 Parametric
-"""
-Random.seed!(2);g=NeuralNet(Chain(Dense(5,10,tanh), Dense(10,1)))
+=#
+Random.seed!(1);g=NeuralNet(Chain(Dense(5,10,tanh), Dense(10,1)))
 @with_kw mutable struct PArgs
     net = g
     maxiter = 40000 # maximum number of iterations
@@ -32,14 +32,14 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(5,10,tanh), Dense(10,1)))
     x = X_fit # lagged data
     y = y_fit
     hyper_taus = ones(2, 2)#[1. 1.;1. 1.]
-    at = 0.05 # parametric precision  gamma hyperparameter alpha
-    bt = 0.05 # parametric gamma hyperparameter beta
-    ataus = 5ones(2,2) # Gamma hyperprior on network weights precision
-    btaus = 5ones(2,2) # IG hyperprior on network weights precision
+    at = 1. # parametric precision  gamma hyperparameter alpha
+    bt = 1. # parametric gamma hyperparameter beta
+    ataus = ones(2,2) # Gamma hyperprior on network weights precision
+    btaus = ones(2,2) # IG hyperprior on network weights precision
     seed = 1
     stepsize = 0.05
     numsteps = 10
-    verb = 100
+    verb = 1000
     npredict = 0
     save=false
     filename = "/sims/salmon/arbnn"
@@ -48,14 +48,12 @@ end
 @time pest = arbnn()
 
 
-# check for thinning
-acf = autocor(pest.weights[1:50:end,1], 1:20)  # autocorrelation for lags 1:20
-plot(acf, title = "Autocorrelation", legend = false, line=:stem)
 
-thinned = pest.weights[2001:50:end,:];
+thinned = pest.weights[1:10:end,:];
 fit, sts = predictions(X_fit, thinned);
-newplt=plot(1:size(X_fit,2), mean(fit,dims=1)', colour=:black, label=nothing);
-plot!(newplt, 1:size(X_fit,2), mean(fit,dims=1)', ribbon=sts, alpha=0.4, colour =:blue, label="fitted model");
+newplt=plot(1:size(X_fit,2), median(fit,dims=1)', colour=:black, label=nothing);
+plot!(newplt, 1:size(X_fit,2), median(fit,dims=1)', ribbon=sts, alpha=0.4, colour =:blue, label="fitted model");
+scatter!(newplt, y_fit');
 display(newplt)
 # uncomment and change location accordingly
 # savefig(newplt, "sims/lynx/bnnparametric/seed1/figures/bnnparametricfit-pred-std.pdf")

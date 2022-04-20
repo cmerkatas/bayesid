@@ -21,7 +21,7 @@ end
 function compute_preconditioner(g::NeuralNet, hyper_taus::Array{Float64, 2})
     preconditioner = []
     for l in 1:1:length(g.nnet)
-        nw, nb = length(vcat(g.nnet[l].W...)), length(vcat(g.nnet[l].b...))
+        nw, nb = length(vcat(g.nnet[l].weight...)), length(vcat(g.nnet[l].bias...))
         push!(preconditioner, hyper_taus[1, l]*ones(nw), hyper_taus[2, l]*ones(nb))
     end
     return vcat(preconditioner...)
