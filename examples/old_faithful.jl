@@ -16,19 +16,18 @@ plot(qqplot(Normal, data))
 plot(pacf(data, 1:10), line=:stem)
 
 # split training data first 100 observations and generate the lagged time series via embed
-ytemp = data[1:end-16]
-D = embed(ytemp, 2)
+ytemp = data[1:end-10]
+lag = 1
+D = embed(ytemp, lag+1)
 
 # train data
 ytrain = convert(Array{Float64, 2}, hcat(D[:, 1]...))
 
-xtrain = convert(Array{Float64, 2}, hcat(D[:, 2:end]...))
-ytest = data[136:end]
+xtrain = convert(Array{Float64, 2}, D[:, 2:end]')
+ytest = data[142:end]
 # end
-"""
-Parametric
-"""
-Random.seed!(2);g=NeuralNet(Chain(Dense(1,10,tanh), Dense(10,1)))
+
+Random.seed!(2);g=NeuralNet(Chain(Dense(1,200,relu), Dense(200,1)))
 @with_kw mutable struct PArgs
     net = g
     maxiter = 40000 # maximum number of iterations
@@ -36,15 +35,15 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(1,10,tanh), Dense(10,1)))
     x = xtrain # lagged data
     y = ytrain
     hyper_taus = ones(2, 2)#[1. 1.;1. 1.]
-    at = 0.001 # parametric precision  gamma hyperparameter alpha
-    bt = 0.001 # parametric gamma hyperparameter beta
-    ataus = 0.001ones(2,2) # Gamma hyperprior on network weights precision
-    btaus = 0.001ones(2,2) # IG hyperprior on network weights precision
+    at = 1.0 # parametric precision  gamma hyperparameter alpha
+    bt = 1.0 # parametric gamma hyperparameter beta
+    ataus = ones(2,2) # Gamma hyperprior on network weights precision
+    btaus = ones(2,2) # IG hyperprior on network weights precision
     seed = 1
-    stepsize = 0.05
-    numsteps = 10
+    stepsize = 0.005
+    numsteps = 50
     verb = 1000
-    npredict = 16
+    npredict = 10
     save=false
     filename = "/sims/faithful/arbnn"
 end
@@ -56,19 +55,19 @@ end
 acf = autocor(pest.weights[1:20:end,1], 1:20)  # autocorrelation for lags 1:20
 plot(acf, title = "Autocorrelation", legend = false, line=:stem)
 
-ŷ = mean(hcat(pest.predictions...)[2001:20:end, :], dims=1)
-ŷstd = std(hcat(pest.predictions...)[2001:20:end, :], dims=1)
+ŷ = mean(hcat(pest.predictions...)[1:20:end, :], dims=1)
+ŷstd = std(hcat(pest.predictions...)[1:20:end, :], dims=1)
 metrics = evaluationmetrics(ŷ , ytest);
 println(metrics)
 
 
 tsteps=1:151;
 newplt=StatsPlots.scatter(data, colour = :blue, label = "data", grid=:false)
-plot!(newplt, [135], seriestype =:vline, colour = :green, linestyle =:dash, label = "training data end")
+plot!(newplt, [141], seriestype =:vline, colour = :green, linestyle =:dash, label = "training data end")
 
-thinned = pest.weights[2001:20:end,:];
+thinned = pest.weights[1:20:end,:];
 fit, sts = predictions(xtrain, thinned);
-plot!(newplt, tsteps[size(xtrain,1)+1:135], mean(fit,dims=1)', colour=:black, label=nothing)
-plot!(newplt, tsteps[size(xtrain,1)+1:135], mean(fit,dims=1)', ribbon=sts, alpha=0.4, colour =:blue, label="np-bnn fitted model")
-plot!(newplt, tsteps[length(ytemp)+1:end], ŷ', ribbon=ŷstd, colour =:purple, alpha=0.4, label="ar-bnn preditions")
+plot!(newplt, tsteps[size(xtrain,1)+2:142], mean(fit,dims=1)', colour=:black, label=nothing);
+plot!(newplt, tsteps[size(xtrain,1)+2:142], mean(fit,dims=1)', ribbon=sts, alpha=0.4, colour =:blue, label="np-bnn fitted model");
+plot!(newplt, tsteps[length(ytemp)+1:end], ŷ', ribbon=ŷstd, colour =:purple, alpha=0.4, label="ar-bnn preditions");
 display(newplt)
