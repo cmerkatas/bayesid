@@ -22,7 +22,7 @@ plot(pacf(data, 1:20), line=:stem)
 
 # split training data first 100 observations and generate the lagged time series via embed
 ytemp = data[1:end-14]
-lag = 10
+lag = 12
 D = embed(ytemp, lag+1)
 
 
@@ -31,7 +31,8 @@ ytrain = convert(Array{Float64, 2}, hcat(D[:, 1]...))
 xtrain = convert(Array{Float64, 2}, D[:, 2:end]')
 
 ytest = data[115:end]
-Random.seed!(2);g=NeuralNet(Chain(Dense(10,20,tanh), Dense(20,1)))
+miact(x) = x + sin(x)
+Random.seed!(2);g=NeuralNet(Chain(Dense(lag,50,miact), Dense(50,1)))
 @with_kw mutable struct PArgs
     net = g
     maxiter = 40000 # maximum number of iterations
@@ -39,10 +40,10 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(10,20,tanh), Dense(20,1)))
     x = xtrain # lagged data
     y = ytrain
     hyper_taus = [1. 1.;1. 1.]
-    at = 0.01 # parametric precision  gamma hyperparameter alpha
-    bt = 0.01 # parametric gamma hyperparameter beta
-    ataus = 0.1ones(2,2) # Gamma hyperprior on network weights precision
-    btaus = 0.1ones(2,2) # IG hyperprior on network weights precision
+    at = 1. # parametric precision  gamma hyperparameter alpha
+    bt = 1. # parametric gamma hyperparameter beta
+    ataus = ones(2,2) # Gamma hyperprior on network weights precision
+    btaus = ones(2,2) # IG hyperprior on network weights precision
     seed = 1
     stepsize = 0.015
     numsteps = 6
@@ -58,8 +59,8 @@ end
 acf = autocor(pest.weights[1:10:end,1], 1:20)  # autocorrelation for lags 1:20
 plot(acf, title = "Autocorrelation", legend = false, line=:stem)
 
-ŷ = mean(hcat(pest.predictions...)[5001+1:50:end, :], dims=1)
-ŷstd = std(hcat(pest.predictions...)[5001+1:50:end, :], dims=1)
+ŷ = mean(hcat(pest.predictions...)[5001+1:10:end, :], dims=1)
+ŷstd = std(hcat(pest.predictions...)[5001+1:10:end, :], dims=1)
 metrics = evaluationmetrics(ŷ , ytest);
 println(metrics)
 # uncomment and change location accordingly
@@ -71,13 +72,13 @@ tsteps=1:128;
 newplt = scatter(data, colour = :blue, label = "Data", grid=:false);
 plot!(newplt, [114], seriestype =:vline, colour = :green, linestyle =:dash, label = "training data end")
 
-thinned = pest.weights[2001:50:end,:];
+thinned = pest.weights[1:20:end,:];
 fit, sts = predictions(xtrain, thinned);
 plot!(newplt, tsteps[size(xtrain,1)+1:114], mean(fit,dims=1)', colour=:black, label=nothing);
+
 plot!(newplt, tsteps[size(xtrain,1)+1:114], mean(fit,dims=1)', ribbon=sts, alpha=0.4, colour =:blue, label="fitted model");
-plot!(newplt, tsteps[length(ytemp)+1:end], ŷ', ribbon=ŷstd, colour =:purple, alpha=0.4, label="preditions")
+plot!(newplt, tsteps[length(ytemp)+1:end], ŷ', ribbon=std(D[:, 5]).*ŷstd, colour =:purple, alpha=0.4, label="preditions")
 display(newplt)
 # uncomment and change location accordingly
 # savefig(newplt, "sims/lynx/bnnparametric/seed1/figures/bnnparametricfit-pred-std.pdf")
 
-plot((data .- mean(data)) ./ std(data))
