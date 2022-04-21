@@ -10,8 +10,9 @@ include("../src/arbnn.jl")
 Data = vec(readdlm("./data/fullusgnp.txt"))
 lData = log.(Data[2:end] ./ Data[1:end-1])
 plot(lData, title="usgnp", legend=nothing)
-dmean, dstd = mean(lData), std(lData)
-data = (lData .- dmean) ./ dstd
+#dmean, dstd = mean(lData), std(lData)
+#data = (lData .- dmean) ./ dstd
+data = copy(lData[1:176])
 plot(data)
 # split training data first 100 observations and generate the lagged time series via embed
 npred = 12
@@ -26,8 +27,12 @@ xtrain = convert(Array{Float64, 2}, D[:, 2:end]')
 ytest = data[end-npred+1:end]
 
 
-# initialize neural net
-Random.seed!(1);g=NeuralNet(Chain(Dense(3,5,tanh), Dense(5,5,tanh), Dense(5,1)))
+plot(qqplot(Normal, data))
+plot(autocor(data, 1:10), line=:stem)
+plot(pacf(data, 1:10), line=:stem)
+
+#= initialize neural net
+Random.seed!(1);g=NeuralNet(Chain(Dense(3,5,tanh), Dense(5,1)))
 # arguments for the main sampler
 @with_kw mutable struct Args
     net = g
@@ -48,18 +53,42 @@ Random.seed!(1);g=NeuralNet(Chain(Dense(3,5,tanh), Dense(5,5,tanh), Dense(5,1)))
     numsteps = 10
     verb = 1000
     npredict = 12
+    sav
     filename = "/sims/usgpd/npbnn/"
 end
 @time est = npbnn();
+=#
 
-burnin=1000
+
+Random.seed!(1);g=NeuralNet(Chain(Dense(5,10,tanh), Dense(10,1)))
+@with_kw mutable struct PArgs
+    net = g
+    maxiter = 40000 # maximum number of iterations
+    burnin = 5000 # burnin iterations
+    x = xtrain # lagged data
+    y = ytrain
+    hyper_taus = [1. 1.;1. 1.]
+    at = 0.05 # parametric precision  gamma hyperparameter alpha
+    bt = 0.05 # parametric gamma hyperparameter beta
+    ataus = 2ones(2,2) # Gamma hyperprior on network weights precision
+    btaus = 2ones(2,2) # IG hyperprior on network weights precision
+    seed = 1
+    stepsize = 0.001
+    numsteps = 50
+    verb = 1000
+    npredict = 12
+    save=false
+    filename = "/sims/usgnp/arbnn"
+end
+
+@time pest = arbnn()
 # check for thinning
-acf = autocor(est.weights[burnin+1:end,1], 1:20)  # autocorrelation for lags 1:20
+acf = autocor(pest.weights[1:20:end,1], 1:20)  # autocorrelation for lags 1:20
 plot(acf, title = "Autocorrelation", legend = false, line=:stem)
 
 
-ŷ = mean(hcat(est.predictions...)[burnin+1:end, :], dims=1)
-ŷstd = std(hcat(est.predictions...)[burnin+1:end, :], dims=1)
+ŷ = mean(hcat(pest.predictions...)[burnin+1:end, :], dims=1)
+ŷstd = std(hcat(pest.predictions...)[burnin+1:end, :], dims=1)
 metrics = evaluationmetrics(ŷ , ytest);
 println(metrics)
 
@@ -67,12 +96,12 @@ println(metrics)
 # prediction plot with stds
 tsteps=1:ntrain;
 ntemp=ntrain
-newplt = StatsPlots.scatter(data, colour = :blue, label = "data", ylim = (-5, 5), grid=:false)
+newplt = StatsPlots.scatter(data, colour = :blue, label = "data", grid=:false)
 plot!(newplt, [ntrain], seriestype =:vline, colour = :green, linestyle =:dash, label = "training data end")
 
-thinned = est.weights[1:end,:];
+thinned = pest.weights[1:end,:];
 fit, sts = predictions(xtrain, thinned);
 plot!(newplt, tsteps[size(xtrain,1)+1:ntrain], mean(fit,dims=1)', colour=:black, label=nothing)
 plot!(newplt, tsteps[size(xtrain,1)+1:ntrain], mean(fit,dims=1)', ribbon=sts, alpha=0.4, colour =:blue, label="np-bnn fitted model")
-plot!(newplt, collect(ntrain+1:222), ŷ', ribbon=dstd.*ŷstd, colour =:purple, alpha=0.4, label="np-bnn preditions")
+plot!(newplt, collect(ntrain+1:176), ŷ', ribbon=dstd.*ŷstd, colour =:purple, alpha=0.4, label="np-bnn preditions")
 display(newplt)

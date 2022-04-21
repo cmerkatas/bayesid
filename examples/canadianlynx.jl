@@ -86,9 +86,9 @@ plot!(clustersplt ,xticks=(0:10000:40000,iters))
 # savefig(clustersplt, "sims/lynx/npbnn/seed123/figures/clusters.pdf")
 
 
-"""
+#=
 Parametric
-"""
+=#
 Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)))
 @with_kw mutable struct PArgs
     net = g
@@ -106,6 +106,7 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)))
     numsteps = 20
     verb = 1000
     npredict = 14
+    save=false
     filename = "/sims/lynx/arbnn"
 end
 
