@@ -38,39 +38,7 @@ plot(forecast(nnfit, h=14))
 metrics(nnpred, ytest)
 
 
-library(astsa)
-data = fmri1[,5]
-data = (data - mean(data)) / sd(data)
-plot(data, type="l")
-ytrain = data[1:114]
-ytest = data[115:length(data)]
+library(BayesARIMAX)
+BayesARIMAX(ytrain, cbind(lag(ytrain, 1), lag(ytrain, 2)), p=2, d=0, q=0)
 
-fmri.ar = ar(ytrain)
-fmri.ar
 
-predictions = predict(fmri.ar, n.ahead=14)
-yhat = predictions$pred
-yhat
-
-metrics(yhat, ytest)
-plot(data)
-lines(115:128, ytest, col="red")
-lines(115:128, yhat, col="blue")
-ytest
-yhat
-yhatnn = c(-0.057517461258437604,
-           -0.9119196086284888,
-           -0.6515321984815113,
-           -0.7271150902447031,
-           -0.44200518307875086,
-           -0.5487920043250327,
-           -0.689470066148799,
-           -0.8090896165965172,
-           -0.9332186547037541,
-           -0.36404634188419915,
-           -0.3092197357887684,
-           0.10850919120372934,
-           -0.03845206824679782,
-           0.3253432422160746)
-
-lines(115:128, yhatnn, col="green")
