@@ -19,14 +19,14 @@ data_plot = explore_data(data)
 ytrain, xtrain, ytest, ntrain = split_data(data, 14, 12);
 
 miact(x) = x + sin(x)^2
-Random.seed!(2);g=NeuralNet(Chain(Dense(lag, 10, miact), Dense(10, 1)))
+Random.seed!(2);g=NeuralNet(Chain(Dense(lag, 20, miact), Dense(20, 1)))
 @with_kw mutable struct PArgs
     net = g
     maxiter = 50000 # maximum number of iterations
     burnin = 10000 # burnin iterations
     x = xtrain # lagged data
     y = ytrain
-    hyper_taus = [1. 1.;1. 1.]
+    hyper_taus = 5 .* [1. 1.;1. 1.]
     at = 0.001 # parametric precision  gamma hyperparameter alpha
     bt = 0.001 # parametric gamma hyperparameter beta
     ataus = 5ones(2,2) # Gamma hyperprior on network weights precision
