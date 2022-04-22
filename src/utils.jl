@@ -2,14 +2,14 @@ embed(x,k) = hcat([x[i+k-1:-1:i] for i in 1:length(x)-k+1]...)'
 
 
 # split training data first 100 observations and generate the lagged time series via embed
-function split_data(data, npredict, model_lag)
+function split_data(data, model_lag, npredict)
     ytemp = data[1:end-npredict]
     ntrain = length(ytemp)
     D = embed(ytemp, lag+1)
 
     ytrain = convert(Array{Float64, 2}, hcat(D[:, 1]...))
     xtrain = convert(Array{Float64, 2}, D[:, 2:end]')
-    ytest = data[115:end]
+    ytest = data[end-npredict+1:1:end]
 
     return ytrain, xtrain, ytest, ntrain
 end
