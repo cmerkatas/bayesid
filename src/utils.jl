@@ -1,5 +1,20 @@
 embed(x,k) = hcat([x[i+k-1:-1:i] for i in 1:length(x)-k+1]...)'
 
+
+# split training data first 100 observations and generate the lagged time series via embed
+function split_data(data, model_lag, npredict)
+    ytemp = data[1:end-npredict]
+    ntrain = length(ytemp)
+    D = embed(ytemp, lag+1)
+
+    ytrain = convert(Array{Float64, 2}, hcat(D[:, 1]...))
+    xtrain = convert(Array{Float64, 2}, D[:, 2:end]')
+    ytest = data[end-npredict+1:1:end]
+
+    return ytrain, xtrain, ytest, ntrain
+end
+
+
 function geometricstickbreak(p::Float64, Nstar::Int64)
     w = zeros(Nstar)
     for j in 1:1:Nstar
@@ -142,3 +157,4 @@ function evaluationmetrics(ŷ, y)
 
     return metrics = (mse = mse, rmse = rmse, mae = mae, mape = mape, u1 = u1, u2 = u2)
 end
+

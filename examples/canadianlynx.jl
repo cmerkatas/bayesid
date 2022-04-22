@@ -13,7 +13,8 @@ plot(data, title="log10 canadian lynx data", legend=nothing)
 
 # split training data first 100 observations and generate the lagged time series via embed
 ytemp = data[1:end-14]
-D = embed(ytemp, 3)
+lag = 2
+D = embed(ytemp, lag+1)
 
 # train data
 ytrain = convert(Array{Float64, 2}, hcat(D[:, 1]...))
@@ -57,21 +58,10 @@ ŷstd = std(hcat(est.predictions...)[2001:50:end, :], dims=1)
 metrics = evaluationmetrics(ŷ , ytest);
 println(metrics)
 
-# uncomment and change location accordingly
-#writedlm("sims/lynx/npbnn/seed123/metrics.txt", hcat(metrics...))
-#writedlm("sims/lynx/npbnn/seed123/ypred.txt", vcat(ŷ,ŷstd)')
-
-# prediction plot with stds
-tsteps=1:114;
-newplt = StatsPlots.scatter(data, colour = :blue, label = "data", ylim = (1, 5.), grid=:false);
-plot!(newplt, [100], seriestype =:vline, colour = :green, linestyle =:dash, label = "training data end");
-
 thinned = est.weights[2001:50:end,:];
 fit, sts = predictions(xtrain, thinned);
-plot!(newplt, tsteps[size(xtrain,1)+1:100], mean(fit,dims=1)', colour=:black, label=nothing);
-plot!(newplt, tsteps[size(xtrain,1)+1:100], mean(fit,dims=1)', ribbon=sts, alpha=0.4, colour =:blue, label="np-bnn fitted model");
-plot!(newplt, tsteps[length(ytemp)+1:end], ŷ', ribbon=ŷstd, colour =:purple, alpha=0.4, label="np-bnn preditions")
-display(newplt)
+plot_results(data, lag, length(ytemp), fit, sts, ŷ, ŷstd; ylim=(1., 5))
+
 # uncomment and change location accordingly
 # savefig(newplt, "sims/lynx/npbnn/seed123/figures/fit-pred-std.pdf")
 
@@ -120,20 +110,12 @@ ŷ = mean(hcat(pest.predictions...)[2001:50:end, :], dims=1)
 ŷstd = std(hcat(pest.predictions...)[2001:50:end, :], dims=1)
 metrics = evaluationmetrics(ŷ , ytest);
 println(metrics)
-# uncomment and change location accordingly
-# writedlm("sims/lynx/bnnparametric/seed1/metrics.txt", hcat(metrics...))
-# writedlm("sims/lynx/bnnparametric/seed1/ypred.txt", vcat(ŷ,ŷstd)')
 
-# prediction plot with stds
-tsteps=1:114;
-newplt = scatter(data, colour = :blue, label = "Data", ylim = (1, 5.), grid=:false);
-plot!(newplt, [100], seriestype =:vline, colour = :green, linestyle =:dash, label = "training data end");
 
 thinned = pest.weights[2001:50:end,:];
 fit, sts = predictions(xtrain, thinned);
-plot!(newplt, tsteps[size(xtrain,1)+1:100], mean(fit,dims=1)', colour=:black, label=nothing);
-plot!(newplt, tsteps[size(xtrain,1)+1:100], mean(fit,dims=1)', ribbon=sts, alpha=0.4, colour =:blue, label="fitted model");
-plot!(newplt, tsteps[length(ytemp)+1:end], ŷ', ribbon=ŷstd, colour =:purple, alpha=0.4, label="preditions")
-display(newplt)
+plot_results(data, lag, length(ytemp), fit, sts, ŷ, ŷstd; ylim=(1., 5))
+
 # uncomment and change location accordingly
-# savefig(newplt, "sims/lynx/bnnparametric/seed1/figures/bnnparametricfit-pred-std.pdf")
+# writedlm("sims/lynx/bnnparametric/seed1/metrics.txt", hcat(metrics...))
+# writedlm("sims/lynx/bnnparametric/seed1/ypred.txt", vcat(ŷ,ŷstd)')
