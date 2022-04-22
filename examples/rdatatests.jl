@@ -35,7 +35,7 @@ miact(x) = x + sin(x)
 Random.seed!(2);g=NeuralNet(Chain(Dense(lag,50,miact), Dense(50,1)))
 @with_kw mutable struct PArgs
     net = g
-    maxiter = 40000 # maximum number of iterations
+    maxiter = 80000 # maximum number of iterations
     burnin = 5000 # burnin iterations
     x = xtrain # lagged data
     y = ytrain
