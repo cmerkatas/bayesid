@@ -16,10 +16,10 @@ data_plot = explore_data(data)
 
 # split training data first 100 observations and generate the lagged time series via embed
 lag = 4
-npred = 9
+npred = 8
 ytrain, xtrain, ytest, ntrain = split_data(data, lag, npred);
 
-Random.seed!(2);g=NeuralNet(Chain(Dense(lag, 20, tanh), Dense(20, 1)))
+Random.seed!(2);g=NeuralNet(Chain(Dense(lag, 50, tanh), Dense(50, 1)))
 @with_kw mutable struct PArgs
     net = g
     maxiter = 50000 # maximum number of iterations
@@ -35,7 +35,7 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(lag, 20, tanh), Dense(20, 1)))
     stepsize = 0.0015
     numsteps = 10
     verb = 1000
-    npredict = 9
+    npredict = 8
     save=false
     filename = "/sims/hare/arbnn"
 end
@@ -50,4 +50,11 @@ println(metrics)
 
 thinned = pest.weights[1:20:end,:];
 fit, sts = predictions(xtrain, thinned);
-plot_results(data, lag, ntrain, fit, std(data).*sts, ŷ, std(data).*ŷstd; legend=:bottomleft)
+plt = plot_results(data, lag, ntrain, fit, std(data).*sts, ŷ, std(data).*ŷstd; legend=:bottomleft)
+
+# fit arima
+armafit, armapred = arima_fit_predict(vec(ytrain), 4, 0, 8);
+armametrics = evaluationmetrics(armapred[:pred], ytest);
+println(armametrics)
+
+plt = plot_results(data, lag, ntrain, fit, std(data).*sts, ŷ, std(data).*ŷstd, armapred[:pred], std(data).*armapred[:se]; legend=:bottomleft)
