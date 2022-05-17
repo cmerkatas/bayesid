@@ -2,12 +2,12 @@ function npbnn(; kws...)
     # load algorithms parameters
     args = Args(; kws...)
     args.seed > 0 && Random.seed!(args.seed)
-
-    savelocation = string(pwd(), args.filename, "/seed$(args.seed)/samples/")
-    figlocation = string(pwd(), args.filename, "/seed$(args.seed)/figures/")
-    mkpath(savelocation)
-    mkpath(figlocation)
-
+    if args.save
+        savelocation = string(pwd(), args.filename, "/seed$(args.seed)/samples/")
+        figlocation =  string(pwd(), args.filename, "/seed$(args.seed)/figures/")
+        mkpath(savelocation)
+    end
+    
     g = args.net # nnet
     x, y = args.x, args.y
     ntemp = length(y)
@@ -112,13 +112,16 @@ function npbnn(; kws...)
         end
     end
 
-    writedlm(string(savelocation, "sampled_weights.txt"), sampled_ws)
-    writedlm(string(savelocation, "sampled_noise.txt"), zp)
-    writedlm(string(savelocation, "sampled_clusters.txt"), clusters)
-
+    if args.save
+        writedlm(string(savelocation, "sampled_weights.txt"), sampled_ws)
+        writedlm(string(savelocation, "sampled_noise.txt"), zp)
+        writedlm(string(savelocation, "sampled_clusters.txt"), clusters)
+    end
     if T > 0
-        for t in 1:T
-            writedlm(string(savelocation, "sampled_pred$t.txt"), preds[t])
+        if args.save
+            for t in 1:T
+                writedlm(string(savelocation, "sampled_pred$t.txt"), preds[t])
+            end
         end
         return est=(weights=sampled_ws, noise=zp, clusters=clusters, precisions=sampled_hypertaus, predictions=preds)
     else

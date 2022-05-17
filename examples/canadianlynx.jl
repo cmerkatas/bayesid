@@ -6,6 +6,7 @@ include("../src/mcmc/hmc.jl")
 include("../src/utils.jl")
 include("../src/npbnn.jl")
 include("../src/arbnn.jl")
+include("../src/plottools.jl")
 
 # load the data and log10 transform
 data = log.(10, readdlm("./data/lynx.txt"))
@@ -38,13 +39,14 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)))
     bp = 1. # beta hyperparameter beta for the geometric probability
     at = 0.05 # atoms  gamma hyperparameter alpha
     bt = 0.05 # atoms gamma hyperparameter beta
-    ataus = 5ones(2,2) # Gamma hyperprior on network weights precision
-    btaus = 5ones(2,2) # IG hyperprior on network weights precision
+    ataus = 1ones(2,2) # Gamma hyperprior on network weights precision
+    btaus = 1ones(2,2) # IG hyperprior on network weights precision
     seed = 123
     stepsize = 0.005
     numsteps = 20
     verb = 1000
     npredict = 14
+    save = false
     filename = "/sims/lynx/npbnndelete/"
 end
 @time est = npbnn();
@@ -58,7 +60,7 @@ ŷstd = std(hcat(est.predictions...)[2001:50:end, :], dims=1)
 metrics = evaluationmetrics(ŷ , ytest);
 println(metrics)
 
-thinned = est.weights[2001:50:end,:];
+thinned = est.weights[2001:10:end,:];
 fit, sts = predictions(xtrain, thinned);
 plot_results(data, lag, length(ytemp), fit, sts, ŷ, ŷstd; ylim=(1., 5))
 
