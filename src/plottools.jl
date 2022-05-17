@@ -13,7 +13,7 @@ function plot_results(data, lag, ntrain, fit, sts, ŷ, ŷstd; kwargs...)
     nfull = size(data, 1)
     tsteps = 1:1:nfull
 
-    plt = scatter(data, label=L"\mathrm{data}", grid=false; kwargs...)
+    plt = scatter(data, label=L"\mathrm{data}", grid=false, colour=:blue; kwargs...)
     plot!(plt, 1:lag+1, data[1:lag+1], colour =:blue)
     plot!(plt, [ntrain], seriestype =:vline, colour = :green, linestyle =:dash, label = L"\mathrm{training\, data\, end}")
     lag += 1
