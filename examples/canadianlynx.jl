@@ -7,25 +7,26 @@ include("../src/utils.jl")
 include("../src/npbnn.jl")
 include("../src/arbnn.jl")
 include("../src/plottools.jl")
+include("../src/R/RUtils.jl")
 
 # load the data and log10 transform
 data = log.(10, readdlm("./data/lynx.txt"))
 plot(data, title="log10 canadian lynx data", legend=nothing)
 
 # split training data first 100 observations and generate the lagged time series via embed
-ytemp = data[1:end-14]
-lag = 2
-D = embed(ytemp, lag+1)
+ytemp = data[1:end-14];
+lag = 2;
+D = embed(ytemp, lag+1);
 
 # train data
-ytrain = convert(Array{Float64, 2}, hcat(D[:, 1]...))
-xtrain = convert(Array{Float64, 2}, D[:, 2:end]')
-ytest = data[101:end]
+ytrain = convert(Array{Float64, 2}, hcat(D[:, 1]...));
+xtrain = convert(Array{Float64, 2}, D[:, 2:end]');
+ytest = data[101:end];
 # end
 
 # for sd in 1:20
 # initialize neural net
-Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)))
+Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)));
 # arguments for the main sampler
 @with_kw mutable struct Args
     net = g
@@ -52,11 +53,11 @@ end
 @time est = npbnn();
 
 # check for thinning
-acf = autocor(est.weights[2001:50:end,1], 1:20)  # autocorrelation for lags 1:20
+acf = autocor(est.weights[2001:50:end,1], 1:20) ; # autocorrelation for lags 1:20
 plot(acf, title = "Autocorrelation", legend = false, line=:stem)
 
-ŷ = mean(hcat(est.predictions...)[2001:50:end, :], dims=1)
-ŷstd = std(hcat(est.predictions...)[2001:50:end, :], dims=1)
+ŷ = mean(hcat(est.predictions...)[2001:50:end, :], dims=1);
+ŷstd = std(hcat(est.predictions...)[2001:50:end, :], dims=1);
 metrics = evaluationmetrics(ŷ , ytest);
 println(metrics)
 
@@ -118,6 +119,12 @@ thinned = pest.weights[2001:50:end,:];
 fit, sts = predictions(xtrain, thinned);
 plot_results(data, lag, length(ytemp), fit, sts, ŷ, ŷstd; ylim=(1., 5))
 
-# uncomment and change location accordingly
-# writedlm("sims/lynx/bnnparametric/seed1/metrics.txt", hcat(metrics...))
-# writedlm("sims/lynx/bnnparametric/seed1/ypred.txt", vcat(ŷ,ŷstd)')
+
+#=
+Fit an ARMA model
+=#
+# fit arima
+best_pq, best_aic = arima_order(vec(ytrain), 12, 12)
+armafit, armapred = arima_fit_predict(vec(ytrain), 4, 0, 14);
+armametrics = evaluationmetrics(armapred[:pred], ytest);
+println(armametrics)

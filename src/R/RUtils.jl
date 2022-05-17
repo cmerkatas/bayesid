@@ -75,14 +75,14 @@ function arima_order(ts, pmax=10, qmax=10)
     R"""
         library(astsa)
         library(stats)
-        aic = AIC(arima(ts, order = c(1, 0, 1)))
+        aic = AIC(arima(ts, order = c(1, 0, 1), method="ML"))
         bestorder = c(0, 0, 0)
         bestaic = Inf
-        for (i in 0:pmax) for (j in 0:qmax){
-                fitaic = AIC(arima(ts, order = c(i, 0, j)))
+        for (i in 1:pmax) for (j in 1:qmax){
+                fitaic = AIC(arima(ts, order = c(i, 0, j), method="ML"))
                 if (fitaic < bestaic){
                     bestorder = c(i, 0, j)
-                    bestarma = arima(ts, order = best.order)
+                    bestarma = arima(ts, order = bestorder, method="ML")
                     bestaic = fitaic
                 }
             }
@@ -104,7 +104,7 @@ function arima_fit_predict(ts, p, q, npred)
     R"""
         library(astsa)
         library(stats)
-        arimafit = arima(ts, order=c(p, 0, q))
+        arimafit = arima(ts, order=c(p, 0, q), method="ML")
         print(arimafit)
         arimapred = predict(arimafit, npred)
     """
@@ -113,6 +113,17 @@ function arima_fit_predict(ts, p, q, npred)
     return arimafit, arimapred
 end
 
+
+function auto_arima(ts, pmax, qmax)
+    @rput ts
+    @rput pmax
+    @rput qmax
+    R"""
+        library(forecast)
+        # recommended setting
+        auto.arima(lynx, max.p=pmax, max.q=qmax, trace = T, stepwise = F, approximation = F)
+    """
+end
 #arfits, preds = arima_fit_predict(data, 4, 0, 10);
 
 # function fit_bayes_arima(y, x, p, q)
