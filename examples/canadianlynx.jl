@@ -125,6 +125,6 @@ Fit an ARMA model
 =#
 # fit arima
 best_pq, best_aic = arima_order(vec(ytrain), 12, 12)
-armafit, armapred = arima_fit_predict(vec(ytrain), 4, 0, 14);
+armafit, armapred = arima_fit_predict(vec(ytrain), 2, 2, 14);
 armametrics = evaluationmetrics(armapred[:pred], ytest);
 println(armametrics)

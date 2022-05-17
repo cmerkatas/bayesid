@@ -121,7 +121,7 @@ function auto_arima(ts, pmax, qmax)
     R"""
         library(forecast)
         # recommended setting
-        auto.arima(lynx, max.p=pmax, max.q=qmax, trace = T, stepwise = F, approximation = F)
+        auto.arima(lynx, max.p=pmax, max.q=qmax)#, trace = T, stepwise = F, approximation = F)
     """
 end
 
