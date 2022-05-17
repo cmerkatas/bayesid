@@ -124,7 +124,7 @@ plot_results(data, lag, length(ytemp), fit, sts, ŷ, ŷstd; ylim=(1., 5))
 Fit an ARMA model
 =#
 # fit arima
-best_pq, best_aic = arima_order(vec(ytrain), 12, 12)
+auto_arima(vec(ytrain), 12, 12)
 armafit, armapred = arima_fit_predict(vec(ytrain), 2, 2, 14);
 armametrics = evaluationmetrics(armapred[:pred], ytest);
 println(armametrics)
