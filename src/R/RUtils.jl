@@ -124,17 +124,4 @@ function auto_arima(ts, pmax, qmax)
         auto.arima(lynx, max.p=pmax, max.q=qmax, trace = T, stepwise = F, approximation = F)
     """
 end
-#arfits, preds = arima_fit_predict(data, 4, 0, 10);
 
-# function fit_bayes_arima(y, x, p, q)
-#     @rput y
-#     @rput x
-#     @rput p
-#     @rput q
-#     R"""
-#         library(BayesARIMAX)
-#         barma = BayesARIMAX(y, x, p=p, d=0, q=q)
-#     """
-#     @rget barma
-#     return barma
-# end
