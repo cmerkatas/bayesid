@@ -47,6 +47,10 @@ function npbnn(; kws...)
     current_ws = HMCState(g.ws, stepsize, numsteps)
     acc_ratio = 0.0
 
+    # for model selection
+    lppd = zeros(maxiter - burnin, n)
+    pwaic2 = zeros(maxiter - burnin, n)
+
     # start main mcmc loop
     for its in 1:1:maxiter
         Nstar = maximum(N)
@@ -80,7 +84,13 @@ function npbnn(; kws...)
         # sample noise predictive
         if its > burnin
             zp[its-burnin] = samplepredictive(w, tau, at, bt)
+            # model selection
+            for i in 1:1:n
+                lf = logpdf(Normal(g(x[:, i], current_ws.x)[1], sqrt(1 / tau[d[i]])), y[i])
+                pwaic2[its - burnin, i] = lf
+                lppd[its - burnin, i] = exp(lf)
 
+            end
         end
 
         if mod(its, verbose_every) == 0
@@ -123,8 +133,8 @@ function npbnn(; kws...)
                 writedlm(string(savelocation, "sampled_pred$t.txt"), preds[t])
             end
         end
-        return est=(weights=sampled_ws, noise=zp, clusters=clusters, precisions=sampled_hypertaus, predictions=preds)
+        return est=(weights=sampled_ws, noise=zp, clusters=clusters, precisions=sampled_hypertaus, waic=-2sum(log.(mean(lppd, dims=1)))+2sum(var(pwaic2, dims=1)), predictions=preds)
     else
-        return est=(weights=sampled_ws, noise=zp, clusters=clusters, precisions=sampled_hypertaus)
+        return est=(weights=sampled_ws, noise=zp, clusters=clusters, precisions=sampled_hypertaus, waic=-2sum(log.(mean(lppd, dims=1)))+2sum(var(pwaic2, dims=1)))
     end
 end

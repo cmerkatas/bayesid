@@ -26,12 +26,12 @@ ytest = data[101:end];
 
 # for sd in 1:20
 # initialize neural net
-Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)));
+Random.seed!(2);g=NeuralNet(Chain(Dense(lag,10,tanh), Dense(10,1)));
 # arguments for the main sampler
 @with_kw mutable struct Args
     net = g
     maxiter = 40000 # maximum number of iterations
-    burnin = 2000 # burnin iterations
+    burnin = 20000 # burnin iterations
     x = xtrain # lagged data
     y = ytrain
     geop = 0.5
@@ -51,6 +51,7 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)));
     filename = "/sims/lynx/npbnndelete/"
 end
 @time est = npbnn();
+est.waic
 
 # check for thinning
 acf = autocor(est.weights[2001:50:end,1], 1:20) ; # autocorrelation for lags 1:20
