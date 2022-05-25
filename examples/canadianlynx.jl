@@ -14,8 +14,8 @@ data = log.(10, readdlm("./data/lynx.txt"))
 plot(data, title="log10 canadian lynx data", legend=nothing)
 
 # split training data first 100 observations and generate the lagged time series via embed
+lag = 11;
 ytemp = data[1:end-14];
-lag = 2;
 D = embed(ytemp, lag+1);
 
 # train data
@@ -26,7 +26,7 @@ ytest = data[101:end];
 
 # for sd in 1:20
 # initialize neural net
-Random.seed!(2);g=NeuralNet(Chain(Dense(lag,10,tanh), Dense(10,1)));
+Random.seed!(2);g=NeuralNet(Chain(Dense(lag,15,tanh), Dense(15,1)));
 # arguments for the main sampler
 @with_kw mutable struct Args
     net = g
@@ -40,15 +40,15 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(lag,10,tanh), Dense(10,1)));
     bp = 1. # beta hyperparameter beta for the geometric probability
     at = 0.05 # atoms  gamma hyperparameter alpha
     bt = 0.05 # atoms gamma hyperparameter beta
-    ataus = 1ones(2,2) # Gamma hyperprior on network weights precision
-    btaus = 1ones(2,2) # IG hyperprior on network weights precision
-    seed = 123
+    ataus = 0.05ones(2,2) # Gamma hyperprior on network weights precision
+    btaus = 0.05ones(2,2) # IG hyperprior on network weights precision
+    seed = 12
     stepsize = 0.005
-    numsteps = 20
+    numsteps = 8
     verb = 1000
     npredict = 14
     save = false
-    filename = "/sims/lynx/npbnndelete/"
+    filename = "/sims/lynx/npbnn/"
 end
 @time est = npbnn();
 est.waic
@@ -78,6 +78,15 @@ iters=["0", "10000","20000","30000","40000"];
 plot!(clustersplt ,xticks=(0:10000:40000,iters))
 # uncomment and change location accordingly
 # savefig(clustersplt, "sims/lynx/npbnn/seed123/figures/clusters.pdf")
+
+#=
+Fit an ARMA model
+=#
+# fit arima
+auto_arima(vec(ytrain), 15, 15)
+armafit, armapred = arima_fit_predict(vec(ytrain), 2, 2, 14);
+armametrics = evaluationmetrics(armapred[:pred], ytest);
+println(armametrics)
 
 
 #=
@@ -121,11 +130,3 @@ fit, sts = predictions(xtrain, thinned);
 plot_results(data, lag, length(ytemp), fit, sts, ŷ, ŷstd; ylim=(1., 5))
 
 
-#=
-Fit an ARMA model
-=#
-# fit arima
-auto_arima(vec(ytrain), 12, 12)
-armafit, armapred = arima_fit_predict(vec(ytrain), 2, 2, 14);
-armametrics = evaluationmetrics(armapred[:pred], ytest);
-println(armametrics)
