@@ -41,11 +41,10 @@ end
 
 function explore_data(data)
     plt1 = plot(data)
-    plt2 = histogram(data, bins = 50)
-    plt3 = plot_rpacf(data)#plot(pacf(data, 1:20), line=:stem)
-    plt4 = plot(qqplot(Normal(), data))
-    
-    plt = plot(plt1, plt2, plt3, plt4, layout=(2,2), size=(800, 800))
+    plt2 = histogram(data, bins = 50, color=:lavender)
+    plt3 = plot_acf(data)
+    plt4 = plot_pacf(data)
+    plt = plot(plt1, plt2, plt3, plt4, layout=(2,2), size=(600, 600))
     return plt
 end
 

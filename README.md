@@ -50,10 +50,15 @@ Next, we load the data
 data = log.(10, readdlm("./data/lynx.txt"));
 plot(data, title="log10 canadian lynx data", legend=nothing)
 ```
-
-Assuming that the data are coming from order 2 Markovian process, we construct the delayed time series
+We can explore the time series along with the ACF and PACF by 
 ```julia
+data_plot = explore_data(data)
+````
+<img src="lynxexplore.png">
 
+The PACF plot show significant partial autocorrelations at lags 1,2. Assuming that the data are coming from order 2 Markovian process, we construct the delayed time series
+
+```julia
 # split training data first 100 observations and generate the lagged time series via embed
 lag = 2;
 ytemp = data[1:end-14];
@@ -91,6 +96,7 @@ Finally, a neural network is defined and a mutable struct containing the model a
 end
 @time est = npbnn();
 ```
+More details can be found in the ```/examples/canadianlynx.jl``` file.
 
 # Parametric models
 We have included some state-of-the-art parametric models like ARMA based on ```R```, using  ```Julia```'s interoperability. These are in ```src/R/RUtils.jl```

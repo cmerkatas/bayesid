@@ -13,6 +13,9 @@ include("../src/R/RUtils.jl")
 data = log.(10, readdlm("./data/lynx.txt"));
 plot(data, title="log10 canadian lynx data", legend=nothing)
 
+# explore the data
+data_plot = explore_data(data)
+savefig(data_plot, "lynxexplore.png")
 # split training data first 100 observations and generate the lagged time series via embed
 lag = 2;
 ytemp = data[1:end-14];
@@ -22,7 +25,7 @@ D = embed(ytemp, lag+1);
 ytrain = convert(Array{Float64, 2}, hcat(D[:, 1]...));
 xtrain = convert(Array{Float64, 2}, D[:, 2:end]');
 ytest = data[101:end];
-# end
+
 
 # for sd in 1:20
 # initialize neural net
