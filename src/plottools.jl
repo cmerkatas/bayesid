@@ -44,7 +44,7 @@ function explore_data(data)
     plt2 = histogram(data, bins = 50, color=:lavender)
     plt3 = plot_acf(data)
     plt4 = plot_pacf(data)
-    plt = plot(plt1, plt2, plt3, plt4, layout=(2,2), size=(600, 600))
+    plt = plot(plt1, plt2, plt3, plt4, layout=(2,2), size=(1500, 1500))
     return plt
 end
 
