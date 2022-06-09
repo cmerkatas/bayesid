@@ -13,7 +13,7 @@ function plot_results(data, lag, ntrain, fit, sts, ŷ, ŷstd; kwargs...)
     nfull = size(data, 1)
     tsteps = 1:1:nfull
 
-    plt = scatter(data, label=L"\mathrm{data}", grid=false; kwargs...)
+    plt = scatter(data, label=L"\mathrm{data}", grid=false, colour=:blue; kwargs...)
     plot!(plt, 1:lag+1, data[1:lag+1], colour =:blue)
     plot!(plt, [ntrain], seriestype =:vline, colour = :green, linestyle =:dash, label = L"\mathrm{training\, data\, end}")
     lag += 1
@@ -27,9 +27,9 @@ function plot_results(data, lag, ntrain, fit, sts, ŷ, ŷstd, armap, armas; kw
     nfull = size(data, 1)
     tsteps = 1:1:nfull
 
-    plt = scatter(data, label=L"\mathrm{data}", grid=false; kwargs...)
-    plot!(plt, 1:lag+1, data[1:lag+1], colour =:blue)
-    plot!(plt, [ntrain], seriestype =:vline, colour = :green, linestyle =:dash, label = L"\mathrm{training\, data\, end}")
+    plt = scatter(data, label=L"\mathrm{data}", colour=:blue, grid=false; kwargs...)
+    plot!(plt, 1:lag+1, data[1:lag+1], color =:blue)
+    plot!(plt, [ntrain], seriestype =:vline, color = :green, linestyle =:dash, label = L"\mathrm{training\, data\, end}")
     lag += 1
     plot!(plt, tsteps[lag:ntrain], mean(fit,dims=1)', ribbon=sts, alpha=0.8, colour=:blue, label=L"\mathrm{fitted\, model}")
     plot!(plt, tsteps[ntrain+1:end], ŷ', colour =:purple, alpha=0.8, label=L"\mathrm{predictions}")
@@ -41,11 +41,10 @@ end
 
 function explore_data(data)
     plt1 = plot(data)
-    plt2 = histogram(data, bins = 50)
-    plt3 = plot_rpacf(data)#plot(pacf(data, 1:20), line=:stem)
-    plt4 = plot(qqplot(Normal(), data))
-    
-    plt = plot(plt1, plt2, plt3, plt4, layout=(2,2), size=(800, 800))
+    plt2 = histogram(data, bins = 50, color=:lavender)
+    plt3 = plot_acf(data)
+    plt4 = plot_pacf(data)
+    plt = plot(plt1, plt2, plt3, plt4, layout=(2,2), size=(600, 600))
     return plt
 end
 

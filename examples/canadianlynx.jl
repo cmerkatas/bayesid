@@ -6,30 +6,35 @@ include("../src/mcmc/hmc.jl")
 include("../src/utils.jl")
 include("../src/npbnn.jl")
 include("../src/arbnn.jl")
+include("../src/plottools.jl")
+include("../src/R/RUtils.jl")
 
 # load the data and log10 transform
-data = log.(10, readdlm("./data/lynx.txt"))
+data = log.(10, readdlm("./data/lynx.txt"));
 plot(data, title="log10 canadian lynx data", legend=nothing)
 
+# explore the data
+data_plot = explore_data(data)
+savefig(data_plot, "lynxexplore.png")
 # split training data first 100 observations and generate the lagged time series via embed
-ytemp = data[1:end-14]
-lag = 2
-D = embed(ytemp, lag+1)
+lag = 2;
+ytemp = data[1:end-14];
+D = embed(ytemp, lag+1);
 
 # train data
-ytrain = convert(Array{Float64, 2}, hcat(D[:, 1]...))
-xtrain = convert(Array{Float64, 2}, D[:, 2:end]')
-ytest = data[101:end]
-# end
+ytrain = convert(Array{Float64, 2}, hcat(D[:, 1]...));
+xtrain = convert(Array{Float64, 2}, D[:, 2:end]');
+ytest = data[101:end];
+
 
 # for sd in 1:20
 # initialize neural net
-Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)))
+Random.seed!(2);g=NeuralNet(Chain(Dense(lag,10,tanh), Dense(10,1)));
 # arguments for the main sampler
 @with_kw mutable struct Args
     net = g
     maxiter = 40000 # maximum number of iterations
-    burnin = 2000 # burnin iterations
+    burnin = 20000 # burnin iterations
     x = xtrain # lagged data
     y = ytrain
     geop = 0.5
@@ -40,25 +45,27 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)))
     bt = 0.05 # atoms gamma hyperparameter beta
     ataus = 5ones(2,2) # Gamma hyperprior on network weights precision
     btaus = 5ones(2,2) # IG hyperprior on network weights precision
-    seed = 123
+    seed = 12
     stepsize = 0.005
-    numsteps = 20
+    numsteps = 8
     verb = 1000
     npredict = 14
-    filename = "/sims/lynx/npbnndelete/"
+    save = false
+    filename = "/sims/lynx/npbnn/"
 end
 @time est = npbnn();
 
+
 # check for thinning
-acf = autocor(est.weights[2001:50:end,1], 1:20)  # autocorrelation for lags 1:20
+acf = autocor(est.weights[2001:50:end,1], 1:20) ; # autocorrelation for lags 1:20
 plot(acf, title = "Autocorrelation", legend = false, line=:stem)
 
-ŷ = mean(hcat(est.predictions...)[2001:50:end, :], dims=1)
-ŷstd = std(hcat(est.predictions...)[2001:50:end, :], dims=1)
+ŷ = mean(hcat(est.predictions...)[2001:50:end, :], dims=1);
+ŷstd = std(hcat(est.predictions...)[2001:50:end, :], dims=1);
 metrics = evaluationmetrics(ŷ , ytest);
 println(metrics)
 
-thinned = est.weights[2001:50:end,:];
+thinned = est.weights[2001:10:end,:];
 fit, sts = predictions(xtrain, thinned);
 plot_results(data, lag, length(ytemp), fit, sts, ŷ, ŷstd; ylim=(1., 5))
 
@@ -72,12 +79,20 @@ clustersplt = plot(ergodic_cluster, ylim=(0,5), lw=1.5, grid=:false, title = "Er
     seriestype =:line, color = :black, label=:none, xlabel="iterations", ylabel="clusters");
 iters=["0", "10000","20000","30000","40000"];
 plot!(clustersplt ,xticks=(0:10000:40000,iters))
-# uncomment and change location accordingly
-# savefig(clustersplt, "sims/lynx/npbnn/seed123/figures/clusters.pdf")
 
 
 #=
-Parametric
+Fit an ARMA model
+=#
+auto_arima(vec(ytrain), 15, 15)
+# best comes out ARMA(2,2)
+armafit, armapred = arima_fit_predict(vec(ytrain), 2, 2, 14);
+armametrics = evaluationmetrics(armapred[:pred], ytest);
+println(armametrics)
+
+
+#=
+autoregressive BNN with parametric, Gaussian noise
 =#
 Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)))
 @with_kw mutable struct PArgs
@@ -116,6 +131,4 @@ thinned = pest.weights[2001:50:end,:];
 fit, sts = predictions(xtrain, thinned);
 plot_results(data, lag, length(ytemp), fit, sts, ŷ, ŷstd; ylim=(1., 5))
 
-# uncomment and change location accordingly
-# writedlm("sims/lynx/bnnparametric/seed1/metrics.txt", hcat(metrics...))
-# writedlm("sims/lynx/bnnparametric/seed1/ypred.txt", vcat(ŷ,ŷstd)')
+
