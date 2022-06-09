@@ -10,11 +10,11 @@ include("../src/plottools.jl")
 include("../src/R/RUtils.jl")
 
 # load the data and log10 transform
-data = log.(10, readdlm("./data/lynx.txt"))
+data = log.(10, readdlm("./data/lynx.txt"));
 plot(data, title="log10 canadian lynx data", legend=nothing)
 
 # split training data first 100 observations and generate the lagged time series via embed
-lag = 11;
+lag = 2;
 ytemp = data[1:end-14];
 D = embed(ytemp, lag+1);
 
@@ -26,7 +26,7 @@ ytest = data[101:end];
 
 # for sd in 1:20
 # initialize neural net
-Random.seed!(2);g=NeuralNet(Chain(Dense(lag,15,tanh), Dense(15,1)));
+Random.seed!(2);g=NeuralNet(Chain(Dense(lag,10,tanh), Dense(10,1)));
 # arguments for the main sampler
 @with_kw mutable struct Args
     net = g
@@ -40,8 +40,8 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(lag,15,tanh), Dense(15,1)));
     bp = 1. # beta hyperparameter beta for the geometric probability
     at = 0.05 # atoms  gamma hyperparameter alpha
     bt = 0.05 # atoms gamma hyperparameter beta
-    ataus = 0.05ones(2,2) # Gamma hyperprior on network weights precision
-    btaus = 0.05ones(2,2) # IG hyperprior on network weights precision
+    ataus = 5ones(2,2) # Gamma hyperprior on network weights precision
+    btaus = 5ones(2,2) # IG hyperprior on network weights precision
     seed = 12
     stepsize = 0.005
     numsteps = 8
@@ -51,7 +51,7 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(lag,15,tanh), Dense(15,1)));
     filename = "/sims/lynx/npbnn/"
 end
 @time est = npbnn();
-est.waic
+
 
 # check for thinning
 acf = autocor(est.weights[2001:50:end,1], 1:20) ; # autocorrelation for lags 1:20
@@ -76,21 +76,20 @@ clustersplt = plot(ergodic_cluster, ylim=(0,5), lw=1.5, grid=:false, title = "Er
     seriestype =:line, color = :black, label=:none, xlabel="iterations", ylabel="clusters");
 iters=["0", "10000","20000","30000","40000"];
 plot!(clustersplt ,xticks=(0:10000:40000,iters))
-# uncomment and change location accordingly
-# savefig(clustersplt, "sims/lynx/npbnn/seed123/figures/clusters.pdf")
+
 
 #=
 Fit an ARMA model
 =#
-# fit arima
 auto_arima(vec(ytrain), 15, 15)
+# best comes out ARMA(2,2)
 armafit, armapred = arima_fit_predict(vec(ytrain), 2, 2, 14);
 armametrics = evaluationmetrics(armapred[:pred], ytest);
 println(armametrics)
 
 
 #=
-Parametric
+autoregressive BNN with parametric, Gaussian noise
 =#
 Random.seed!(2);g=NeuralNet(Chain(Dense(2,10,tanh), Dense(10,1)))
 @with_kw mutable struct PArgs
