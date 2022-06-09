@@ -43,15 +43,10 @@ include("../src/R/RUtils.jl")
 
 ```
 
-Next, we load the data
-
+Next, we load the data and explore the time series along with the ACF and PACF.
 
 ```julia
 data = log.(10, readdlm("./data/lynx.txt"));
-plot(data, title="log10 canadian lynx data", legend=nothing)
-```
-We can explore the time series along with the ACF and PACF by 
-```julia
 data_plot = explore_data(data)
 ````
 <img src="lynxexplore.png">
