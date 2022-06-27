@@ -14,7 +14,7 @@ data = log.(10, readdlm("./data/lynx.txt"));
 plot(data, title="log10 canadian lynx data", legend=nothing)
 
 # explore the data
-data_plot = explore_data(data)
+data_plot = explore_data(data) # requires R packages TimeSeries.OBeu and ts
 savefig(data_plot, "lynxexplore.png")
 # split training data first 100 observations and generate the lagged time series via embed
 lag = 2;
