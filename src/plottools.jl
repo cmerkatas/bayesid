@@ -1,12 +1,4 @@
 using StatsPlots, StatsBase, DelimitedFiles, LaTeXStrings, KernelDensity, Latexify, RCall
-default(; # Plots defaults
-    fontfamily="Computer modern",
-    label="" # only explicit legend entries
-    )
-set_default(; # Latexify defaults
-    #unitformat=:slash # in case you want `m/s`
-    )
-scalefontsizes(1.2)
 
 
 function plot_results(data, lag, ntrain, fit, sts, ŷ, ŷstd; kwargs...)

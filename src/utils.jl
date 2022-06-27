@@ -29,9 +29,9 @@ function sampleatoms(g::NeuralNet, ws::HMCState, y::Array{Float64, 2}, x::Array{
     @assert (a > zero(a)) & (b > zero(b))
     n = size(x, 2)
     atoms = zeros(Nstar)
-    @inbounds for j in 1:1:Nstar
+    for j in 1:1:Nstar
         term, counts = 0.0, 0
-        @inbounds for i in 1:1:n
+        for i in 1:1:n
             if d[i] .== j
                 counts += 1
                 term += (y[i] - g(x[:, i], ws.x)[1])^2
@@ -52,15 +52,15 @@ function sampleclusters(g::NeuralNet, ws::HMCState, y::Array{Float64, 2}, x::Arr
     @assert size(x, 2) == length(y)
     n = size(x, 2)
     clusters, slices = zeros(Int64, n), zeros(Int64, n)
-    @inbounds for i in 1:1:n
+    for i in 1:1:n
         nc = 0
-        @inbounds for k in 1:Nis[i]
-            nc += atoms[k]^(0.5) * exp(-0.5atoms[k] * (y[i] - g(x[:, i], ws.x)[1]).^2)
+        for k in 1:Nis[i]
+            @inbounds nc += atoms[k]^(0.5) * exp(-0.5atoms[k] * (y[i] - g(x[:, i], ws.x)[1]).^2)
         end
         probs = 0.0
         uu = rand()
-        @inbounds for k in 1:Nis[i]
-            probs += atoms[k]^(0.5) * exp(-0.5atoms[k] * (y[i] - g(x[:, i], ws.x)[1]).^2) / nc
+        for k in 1:Nis[i]
+            @inbounds probs += atoms[k]^(0.5) * exp(-0.5atoms[k] * (y[i] - g(x[:, i], ws.x)[1]).^2) / nc
             if uu < probs
                 clusters[i] = k
                 slices[i] = tgeornd(geop, clusters[i])
@@ -97,7 +97,7 @@ end
 function predictions(x::Array{Float64, 2}, weights::Array{Float64, 2})
     np, _ = size(weights)
     preds = zeros(np, size(x,2))
-    @inbounds for i in 1:1:np
+    for i in 1:1:np
         preds[i, :] = g(x, weights[i, :])
     end
     stds = std(preds, dims=1)
@@ -129,7 +129,7 @@ end
 function predictions(x::Array{Float64, 2}, weights::Array{Float64, 2})
     np, _ = size(weights)
     preds = zeros(np, size(x, 2))
-    @inbounds for i in 1:1:np
+    for i in 1:1:np
         preds[i, :] = g(x, weights[i, :])
     end
     stds = std(preds, dims=1)
