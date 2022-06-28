@@ -1,13 +1,13 @@
 using RCall
 using StatsPlots, StatsBase, DelimitedFiles, LaTeXStrings, KernelDensity, Latexify, RCall
-default(; # Plots defaults
-    fontfamily="Computer modern",
-    label="" # only explicit legend entries
-    )
-set_default(; # Latexify defaults
-    #unitformat=:slash # in case you want `m/s`
-    )
-scalefontsizes(1.2)
+# default(; # Plots defaults
+#     fontfamily="Computer modern",
+#     label="" # only explicit legend entries
+#     )
+# set_default(; # Latexify defaults
+#     #unitformat=:slash # in case you want `m/s`
+#     )
+# scalefontsizes(1.2)
 
 
 function plot_acf(series)
@@ -65,36 +65,6 @@ function plot_pacf(series)
 end
 
 
-#=
-Model fitting
-=#
-function arima_order(ts, pmax=10, qmax=10)
-    @rput ts
-    @rput pmax
-    @rput qmax
-    R"""
-        library(astsa)
-        library(stats)
-        aic = AIC(arima(ts, order = c(1, 0, 1), method="ML"))
-        bestorder = c(0, 0, 0)
-        bestaic = Inf
-        for (i in 1:pmax) for (j in 1:qmax){
-                fitaic = AIC(arima(ts, order = c(i, 0, j), method="ML"))
-                if (fitaic < bestaic){
-                    bestorder = c(i, 0, j)
-                    bestarma = arima(ts, order = bestorder, method="ML")
-                    bestaic = fitaic
-                }
-            }
-        pq = bestorder
-        aic = bestaic
-    """
-    @rget pq
-    @rget aic
-    return pq, aic
-end
-
-#pq, aic = arima_order(data, 8, 8)
 
 function arima_fit_predict(ts, p, q, npred)
     @rput ts
