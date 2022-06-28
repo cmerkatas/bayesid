@@ -6,7 +6,7 @@ function plot_results(data, lag, ntrain, fit, sts, ŷ, ŷstd; kwargs...)
     tsteps = 1:1:nfull
 
     plt = scatter(data, label=L"\mathrm{data}", grid=false, colour=:blue; kwargs...)
-    plot!(plt, 1:lag+1, data[1:lag+1], colour =:blue)
+    plot!(plt, 1:lag+1, data[1:lag+1], colour =:blue, label=:false)
     plot!(plt, [ntrain], seriestype =:vline, colour = :green, linestyle =:dash, label = L"\mathrm{training\, data\, end}")
     lag += 1
     plot!(plt, tsteps[lag:ntrain], mean(fit,dims=1)', ribbon=sts, alpha=0.4, colour=:blue, label=L"\mathrm{fitted\, model}")

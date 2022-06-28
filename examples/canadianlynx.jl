@@ -14,8 +14,8 @@ data = log.(10, readdlm("./data/lynx.txt"));
 plot(data, title="log10 canadian lynx data", legend=nothing)
 
 # explore the data
-data_plot = explore_data(data) # requires R packages TimeSeries.OBeu and ts
-savefig(data_plot, "lynxexplore.png")
+# data_plot = explore_data(data) # requires R packages TimeSeries.OBeu and ts
+# savefig(data_plot, "lynxexplore.png")
 # split training data first 100 observations and generate the lagged time series via embed
 lag = 2;
 ytemp = data[1:end-14];
@@ -34,7 +34,7 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(lag,10,tanh), Dense(10,1)));
 @with_kw mutable struct Args
     net = g
     maxiter = 40000 # maximum number of iterations
-    burnin = 20000 # burnin iterations
+    burnin = 5000 # burnin iterations
     x = xtrain # lagged data
     y = ytrain
     geop = 0.5
@@ -45,7 +45,7 @@ Random.seed!(2);g=NeuralNet(Chain(Dense(lag,10,tanh), Dense(10,1)));
     bt = 0.05 # atoms gamma hyperparameter beta
     ataus = 5ones(2,2) # Gamma hyperprior on network weights precision
     btaus = 5ones(2,2) # Gamma hyperprior on network weights precision
-    seed = 12
+    seed = 123
     stepsize = 0.005
     numsteps = 20
     verb = 1000
