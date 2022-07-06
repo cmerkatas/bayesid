@@ -81,9 +81,9 @@ Finally, a neural network is defined and a mutable struct containing the model a
     bt = 0.05 # atoms gamma hyperparameter beta
     ataus = 5ones(2,2) # Gamma hyperprior on network weights precision
     btaus = 5ones(2,2) # IG hyperprior on network weights precision
-    seed = 12
+    seed = 123
     stepsize = 0.005
-    numsteps = 8
+    numsteps = 20
     verb = 1000
     npredict = 14
     save = false
