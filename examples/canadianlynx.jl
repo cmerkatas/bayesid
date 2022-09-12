@@ -132,3 +132,24 @@ fit, sts = predictions(xtrain, thinned);
 plot_results(data, lag, length(ytemp), fit, sts, ŷ, ŷstd; ylim=(1., 5))
 
 
+#=
+MSAR results. Use Sylvia Frühwirth-Schnatter bayesf package.
+=#
+ymsar = [
+    2.4040
+    2.8186
+    3.0998
+    3.2180
+    3.1403
+    2.9982
+    2.8127
+    2.7003
+    2.7111
+    2.7897
+    2.9431
+    3.0560
+    3.2217
+    3.3994]
+
+metrics = evaluationmetrics(ymsar , ytest);
+println(metrics)
