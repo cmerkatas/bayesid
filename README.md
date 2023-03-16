@@ -96,6 +96,6 @@ More details can be found in the ```/examples/canadianlynx.jl``` file.
 # Parametric models
 We have included some state-of-the-art parametric models like ARMA based on ```R```, using  ```Julia```'s interoperability. These are in ```src/R/RUtils.jl```
 # References
-[1] Merkatas, C., & Särkkä, S. (2021). *System identification using autoregressive Bayesian neural networks with nonparametric noise processes.* (in revision)
+[1] Merkatas, C., & Särkkä, S. (2022). *System identification using autoregressive Bayesian neural networks with nonparametric noise processes.* Journal of Time Series Analysis.
 
 [2] Nakada, Y., Matsumoto, T., Kurihara, T., & Yosui, K. (2005). *Bayesian reconstructions and predictions of nonlinear dynamical systems via the hybrid Monte Carlo scheme*. Signal processing, 85(1), 129-145.
