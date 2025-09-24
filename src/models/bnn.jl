@@ -15,7 +15,7 @@ mutable struct NeuralNet{N, W, RE}
         new{typeof(nnet), typeof(ws), typeof(re)}(nnet, ws, re)
     end
 end
-@Flux.functor NeuralNet
+Functors.@functor NeuralNet
 (b::NeuralNet)(x, ws=b.ws) = b.re(ws)(x)
 
 function compute_preconditioner(g::NeuralNet, hyper_taus::Array{Float64, 2})
@@ -43,8 +43,8 @@ function ∇U(g::NeuralNet,
             x::AbstractArray,
             tau::Union{Float64, Array{Float64,1}},
             tau_preconditioner::Vector)
-   g.ws = new_w
-   ps = Flux.params(g.ws)
-   gs=Zygote.gradient(g -> U(g, g.ws, y, x, tau, tau_preconditioner), g)[1].ws
+#    g.ws = new_w
+#    ps = Flux.params(g.ws)
+   gs=Zygote.gradient(w -> U(g, w, y, x, tau, tau_preconditioner), new_w)[1]
    return gs
 end

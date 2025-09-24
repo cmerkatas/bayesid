@@ -10,12 +10,12 @@ Fields:
     - mass: mass matrix
 """
 mutable struct HMCState <: SamplerState
-    x::Array{Float32,1}
+    x::Array{Float64,1}
     p::Array{Float64,1} # included in sampler state to allow autoregressive updates.
     stepsize::Float64
     niters::Int64
     mass
-    function HMCState(x::Array{Float32,1},stepsize::Float64,niters::Int64;p=randn(length(x)),mass=1.0)
+    function HMCState(x::Array{Float64, 1},stepsize::Float64,niters::Int64;p=randn(length(x)),mass=1.0)
         if isa(mass,Number)
           mass = mass * ones(length(x))
         end
