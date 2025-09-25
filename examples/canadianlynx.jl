@@ -78,7 +78,7 @@ clustersplt = plot(ergodic_cluster, ylim=(0,5), lw=1.5, grid=:false, title = "Er
     seriestype =:line, color = :black, label=:none, xlabel="iterations", ylabel="clusters");
 iters=["0", "10000","20000","30000","40000"];
 plot!(clustersplt ,xticks=(0:10000:40000,iters))
-
+# savefig(clustersplt, "bnp_lynx_clusters.pdf")  # change location accordingly
 
 #=
 Fit an ARMA model
