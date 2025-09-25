@@ -41,8 +41,8 @@ Random.seed!(2);g=NeuralNet(fmap(f64, Chain([Dense(lag,5,tanh), Dense(5,1)])));
     hyper_taus = [1. 1. ;1. 1.]
     ap = 1. # beta hyperparameter alpha for the geometric probability
     bp = 1. # beta hyperparameter beta for the geometric probability
-    at = 2. # atoms  gamma hyperparameter alpha
-    bt = 2. # atoms gamma hyperparameter beta
+    at = 0.05 # atoms  gamma hyperparameter alpha
+    bt = 0.05 # atoms gamma hyperparameter beta
     ataus = 5ones(2,2) # Gamma hyperprior on network weights precision
     btaus = 5ones(2,2) # Gamma hyperprior on network weights precision
     seed = 123
@@ -60,17 +60,16 @@ end
 acf = autocor(est.weights[2001:50:end,1], 1:20) ; # autocorrelation for lags 1:20
 plot(acf, title = "Autocorrelation", legend = false, line=:stem)
 
-ŷ = mean(hcat(est.predictions...)[2001:50:end, :], dims=1);
-ŷstd = std(hcat(est.predictions...)[2001:50:end, :], dims=1);
+ŷ = mean(hcat(est.predictions...)[1001:1:end, :], dims=1);
+ŷstd = std(hcat(est.predictions...)[1001:1:end, :], dims=1);
 metrics = evaluationmetrics(ŷ , ytest);
 println(metrics)
 
-thinned = est.weights[2001:10:end,:];
+thinned = est.weights[1001:10:end,:];
 fit, sts = predictions(xtrain, thinned);
-plot_results(data, lag, length(ytemp), fit, sts, ŷ, ŷstd; ylim=(1., 5))
-
+plt=plot_results(data, lag, length(ytemp), fit, sts, ŷ, ŷstd; ylim=(1., 5))
+savefig(plt, "bnp_lynx.pdf")  # change location accordingly
 # uncomment and change location accordingly
-# savefig(newplt, "sims/lynx/npbnn/seed123/figures/fit-pred-std.pdf")
 
 # clusters
 clusters = est.clusters;

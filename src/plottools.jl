@@ -1,5 +1,13 @@
 using StatsPlots, StatsBase, DelimitedFiles, LaTeXStrings, KernelDensity, Latexify, RCall
 
+default(; # Plots defaults
+    fontfamily="Computer modern",
+    label="" # only explicit legend entries
+    )
+set_default(; # Latexify defaults
+    #unitformat=:slash # in case you want `m/s`
+    )
+
 
 function plot_results(data, lag, ntrain, fit, sts, ŷ, ŷstd; kwargs...)
     nfull = size(data, 1)
@@ -10,7 +18,7 @@ function plot_results(data, lag, ntrain, fit, sts, ŷ, ŷstd; kwargs...)
     plot!(plt, [ntrain], seriestype =:vline, colour = :green, linestyle =:dash, label = L"\mathrm{training\, data\, end}")
     lag += 1
     plot!(plt, tsteps[lag:ntrain], mean(fit,dims=1)', ribbon=sts, alpha=0.4, colour=:blue, label=L"\mathrm{fitted\, model}")
-    plot!(plt, tsteps[ntrain+1:end], ŷ', ribbon=ŷstd, colour =:purple, alpha=0.4, label=L"\mathrm{preditions}")
+    plot!(plt, tsteps[ntrain+1:end], ŷ', ribbon=ŷstd, colour =:purple, alpha=0.4, label=L"\mathrm{predictions}")
     return plt
 end
 
